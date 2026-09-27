@@ -1,4 +1,10 @@
 {
-  "_comment": "M1: id da faixa -> nome legivel. Só faixas nativas do jogo.",
+  "_note": "Faixas NATIVAS do jogo. Preenchido no PC a partir do dump. Faixa nativa preserva a dinamica de intensidade da trilha; e por isso que o M2 comeca so com elas.",
+  "_schema": {
+    "id": "string, obrigatorio — id da faixa como o jogo a dispara",
+    "name": "string, opcional — nome legivel; ausente, usa o id",
+    "source": "string, opcional — de onde a faixa vem, para dar contexto na lista",
+    "dynamic": "bool, opcional (padrao true) — false marca loop simples, sem dinamica"
+  },
   "tracks": []
 }

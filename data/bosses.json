@@ -1,4 +1,9 @@
 {
-  "_comment": "M1: id do encontro -> nome legivel. Cruzar com DT_jRPG_Encounters.",
+  "_note": "Preenchido no PC a partir de DT_jRPG_Encounters (a mesma tabela que o randomizer sobrescreve). Array vazio e valido: o overlay mostra os ids crus que o jogo reportar e lista em 'vistos em jogo' o que faltar aqui.",
+  "_schema": {
+    "id": "string, obrigatorio — id do encontro exatamente como o jogo reporta",
+    "name": "string, opcional — nome legivel; ausente, usa o id",
+    "group": "string, opcional — agrupamento na UI (ato, regiao, 'opcional')"
+  },
   "bosses": []
 }
