@@ -31,6 +31,8 @@ local core_files = {
     "src/Config/*.cpp",
     "src/Data/*.cpp",
     "src/Core/*.cpp",
+    "src/Hooks/CombatStart.cpp", -- compila nativo de proposito: simulate() e o
+                                 -- caminho de teste sem o jogo
 }
 
 target("BossMusicSwapper")
@@ -40,6 +42,7 @@ target("BossMusicSwapper")
     set_enabled(is_plat("windows"))
 
     add_files("src/dllmain.cpp", "src/Mod.cpp", "src/UI/*.cpp")
+    add_files("src/Hooks/AudioSwap.cpp") -- unica parte que fala com o audio do jogo
     add_files(core_files)
     add_includedirs("src")
     add_packages("nlohmann_json")
