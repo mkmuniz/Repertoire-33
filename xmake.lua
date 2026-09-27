@@ -1,14 +1,22 @@
 -- E33 Boss Music Swapper — UE4SS C++ mod
 --
--- PRE-REQUISITO: defina UE4SS_SDK apontando para o checkout do UE4SS
--- (com RE-UE4SS/include e as libs já compiladas):
---   xmake f --ue4ss=C:/path/to/RE-UE4SS
+-- Três targets:
+--   BossMusicSwapper  DLL do mod. Windows/MSVC, precisa do checkout do UE4SS:
+--                       xmake f --ue4ss=C:/path/to/RE-UE4SS && xmake
+--   tests             Testes da lógica pura. Roda em qualquer SO, sem o jogo:
+--                       xmake build tests && xmake run tests
+--   harness           Preview nativo do overlay em ImGui, sem o jogo:
+--                       xmake build harness && xmake run harness
 --
--- Só compila no Windows/MSVC: o target é uma DLL carregada pelo UE4SS.
+-- Só a DLL depende de Windows. Ver docs/DEV-MACOS.md.
 
 set_xmakever("2.8.0")
 set_languages("c++23")
-set_arch("x64")
+set_allowedmodes("debug", "release")
+add_rules("mode.debug", "mode.release")
+
+add_requires("nlohmann_json")
+add_requires("doctest")
 
 option("ue4ss")
     set_default("")
@@ -16,26 +24,46 @@ option("ue4ss")
     set_description("Caminho para o checkout do RE-UE4SS")
 option_end()
 
+-- Lógica que não conhece nem o Unreal nem o ImGui. Compartilhada pelos três
+-- targets, e é o que os testes cobrem.
+local core_files = {
+    "src/Support/*.cpp",
+    "src/Config/*.cpp",
+    "src/Data/*.cpp",
+    "src/Core/*.cpp",
+}
+
 target("BossMusicSwapper")
     set_kind("shared")
     set_basename("main")
+    set_default(false) -- precisa de Windows + UE4SS; não entra no build padrão
+    set_enabled(is_plat("windows"))
 
-    add_files("src/**.cpp")
+    add_files("src/dllmain.cpp", "src/Mod.cpp", "src/UI/*.cpp")
+    add_files(core_files)
     add_includedirs("src")
+    add_packages("nlohmann_json")
+    add_defines("E33_WITH_UE4SS")
 
-    -- TODO(M1): trocar por add_deps("UE4SS") se o mod for compilado dentro
-    -- da árvore do UE4SS. Standalone precisa dos includes + import lib.
     on_load(function (target)
         local sdk = get_config("ue4ss")
-        if sdk and sdk ~= "" then
-            target:add("includedirs", path.join(sdk, "UE4SS/include"))
-            target:add("includedirs", path.join(sdk, "deps/first/File/include"))
-            target:add("includedirs", path.join(sdk, "deps/first/DynamicOutput/include"))
-            target:add("includedirs", path.join(sdk, "deps/third/imgui"))
+        if not sdk or sdk == "" then
+            return
         end
+        target:add("includedirs", path.join(sdk, "UE4SS/include"))
+        target:add("includedirs", path.join(sdk, "deps/first/File/include"))
+        target:add("includedirs", path.join(sdk, "deps/first/DynamicOutput/include"))
+        target:add("includedirs", path.join(sdk, "deps/third/imgui"))
     end)
 
     if is_plat("windows") then
         add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN")
         add_cxflags("/utf-8", "/EHsc")
     end
+
+target("tests")
+    set_kind("binary")
+    add_files("tests/*.cpp")
+    add_files(core_files)
+    add_includedirs("src")
+    add_packages("nlohmann_json", "doctest")
