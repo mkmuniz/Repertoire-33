@@ -11,24 +11,26 @@ void CombatWatcher::set_callback(CombatStartCallback callback)
 
 bool CombatWatcher::install()
 {
-#if defined(E33_WITH_UE4SS)
+#if defined(_WIN32)
     // TODO(M0 — só é possível com o jogo aberto): achar a função que dispara o
     // combate e o campo com o id do encontro, e chamar m_callback ali.
     //
     // Caminho recomendado pelo plano, nesta ordem:
-    //   1. Protótipo em Lua (recarrega sem fechar o jogo) para achar a classe:
-    //      RegisterHook em candidatos de BP_/jRPG_ e imprimir o nome da classe
-    //      e as propriedades do objeto no console do UE4SS.
+    //   1. Gerar o SDK com o Dumper-7 e procurar nele a classe de combate: os
+    //      nomes vêm do próprio jogo, então "jRPG", "Encounter" e "Battle" são
+    //      os termos por onde começar.
     //   2. Cruzar o id com DT_jRPG_Encounters (a tabela que o randomizer
     //      sobrescreve) para confirmar que é o mesmo identificador.
-    //   3. Referência de um hook de combate já funcionando neste jogo: o README
-    //      do mod AutoParryAnim, que é UE4SS em C++ para o proprio E33.
+    //   3. Gerar o SDK do jogo com o Dumper-7 (público): ele produz os headers
+    //      C++ das classes do Unreal para ESTA versão do jogo, que é o papel
+    //      que o UEPseudo teria. Com o SDK em mãos, o hook sai por endereço de
+    //      função, com o safetyhook ou o MinHook que já está no projeto.
     //
     // Enquanto isso não existe, install() falha alto em vez de fingir sucesso:
     // um mod que diz "instalado" e não faz nada é pior que um que diz o que
     // falta.
     log::warn("hook de inicio de combate ainda nao implementado (M0); "
-              "use o comando de simulacao para testar a logica");
+              "use a simulacao para testar a logica");
     m_installed = false;
     return false;
 #else

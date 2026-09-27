@@ -1,40 +1,42 @@
-# Por que a DLL ainda não é distribuída
+# Por que este mod não usa UE4SS
 
-Estado: **bloqueado por uma dependência privada do UE4SS**, não por código deste
-repositório.
+Decisão tomada depois de o build falhar no CI. O impedimento não era de
+toolchain, era de permissão.
 
 ## O que foi verificado
 
 | Verificação | Resultado |
 |---|---|
-| Mod C++ compila standalone contra um SDK? | Não. A release `zDEV-UE4SS_v3.0.1.zip` tem 166 arquivos e **nenhum** header ou `.lib` |
+| Mod C++ compila standalone contra um SDK do UE4SS? | Não. A release `zDEV-UE4SS_v3.0.1.zip` tem 166 arquivos e **nenhum** header ou `.lib` |
 | Fluxo oficial | `add_subdirectory(RE-UE4SS)` — o mod compila junto com o UE4SS inteiro |
 | RE-UE4SS compila sozinho? | Não. Exige o submódulo `Re-UE4SS/UEPseudo` |
 | `Re-UE4SS/UEPseudo` é público? | **Não.** A API do GitHub devolve `Not Found`; o CI do próprio UE4SS usa `token: ${{ secrets.UEPSEUDO_PAT }}` |
 | Versão antiga resolve? | Não. `v2.5.2` depende do mesmo repositório privado |
-| Existe espelho público confiável? | Não. Duas buscas: um repo vazio (0 KB) e um fork para outro jogo |
-| A API Lua do UE4SS tem ImGui? | Não. Só keybind, hook, comando de console |
+| Existe espelho público confiável? | Não. Um repositório vazio (0 KB) e um fork para outro jogo |
+| A API Lua do UE4SS tem ImGui? | Não. Só keybind, hook e comando de console |
 
-## O que isso significa
+Ou seja: ninguém sem acesso ao UEPseudo compila um mod C++ de UE4SS — nem este
+repositório, nem o CI, nem você na sua máquina.
 
-Qualquer pessoa sem acesso ao UEPseudo — incluindo o CI deste repositório — não
-consegue compilar um mod C++ de UE4SS. O impedimento não é de toolchain: é de
-permissão.
+## O que foi feito no lugar
 
-## Caminhos
+Stack pública inteira, sem nenhuma dependência privada:
 
-1. **Pedir acesso ao UEPseudo** à equipe do UE4SS (Discord do projeto). Com o
-   acesso, gerar um PAT de leitura e guardá-lo como o secret `UEPSEUDO_PAT`; o
-   workflow `build-mod.yml` passa a compilar e publicar o zip. É o caminho que
-   preserva o overlay in-game como está construído.
+| Peça | Projeto | Licença | Papel |
+|---|---|---|---|
+| SDK do jogo | [Dumper-7](https://github.com/Encryqed/Dumper-7) | permissiva | gera os headers C++ das classes do Unreal para **esta** versão do jogo — o papel que o UEPseudo teria |
+| Hook | [MinHook](https://github.com/TsudaKageyu/minhook) | BSD-2 | engancha as vtables de D3D |
+| Interface | [Dear ImGui](https://github.com/ocornut/imgui) | MIT | desenha o overlay |
+| JSON | [nlohmann/json](https://github.com/nlohmann/json) | MIT | config e dados |
 
-2. **Mod em Lua.** Não precisa compilar e instala na hora, mas a API Lua não
-   expõe ImGui: a configuração viria de arquivo e comandos de console, sem
-   overlay. Boa parte da lógica deste repositório teria de ser reescrita.
+A DLL entra no processo por proxy (`dinput8.dll` ao lado do executável — o
+UE4SS usa `dwmapi.dll`, então os dois convivem) ou por injetor, engancha o
+`Present` da swapchain e desenha no quadro do jogo.
 
-3. **Lua + janela externa.** O mod Lua lê o jogo e publica o estado; um programa
-   separado desenha a interface. Mantém a interface, perde o "um artefato só"
-   e o overlay sobre o jogo em tela cheia.
+**O que se perde:** a API de reflexão do UE4SS, que resolvia sozinha achar
+classes e propriedades do Unreal. No lugar dela vem o SDK do Dumper-7, gerado
+uma vez por versão do jogo. É mais trabalho no M0, que já era o milestone de
+reconhecimento de qualquer forma.
 
-Até a decisão, o CI cobre o que de fato funciona: a camada de lógica, que roda
-em qualquer sistema sem o jogo.
+**O que se ganha:** nenhuma dependência privada, CI compila e publica o zip, e
+o mod não depende do UE4SS estar instalado.

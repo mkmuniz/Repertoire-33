@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <format>
 #include <string>
 #include <string_view>
@@ -12,6 +13,11 @@ void set_verbose(bool on);
 [[nodiscard]] bool verbose();
 
 void write_line(std::string_view level, std::string_view message);
+
+// Log em arquivo, dentro da pasta do mod. Sem isso você depura no escuro quando
+// alguém disser "não funcionou no boss X" — e é a primeira coisa que se pede.
+void open_file(const std::filesystem::path& path);
+void close_file();
 
 template <typename... Args>
 void info(std::format_string<Args...> fmt, Args&&... args)

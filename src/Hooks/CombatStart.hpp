@@ -24,7 +24,7 @@ class CombatWatcher
 public:
     void set_callback(CombatStartCallback callback);
 
-    // Instala o hook de verdade. No-op fora do build com UE4SS.
+    // Instala o hook de verdade. No-op fora do Windows.
     // Devolve false se não achou o alvo do hook — e aí o log diz o que faltou.
     bool install();
     [[nodiscard]] bool installed() const { return m_installed; }
