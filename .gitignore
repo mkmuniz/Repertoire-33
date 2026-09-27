@@ -1,0 +1,18 @@
+# xmake
+build/
+.xmake/
+
+# MSVC
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+.vs/
+
+# ImGui persiste posicao/tamanho da janela aqui
+imgui.ini
+
+# macOS
+.DS_Store
