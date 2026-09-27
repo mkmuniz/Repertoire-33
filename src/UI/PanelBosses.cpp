@@ -2,12 +2,14 @@
 
 #include <imgui.h>
 
+#include "UI/Theme.hpp"
+
 namespace e33::ui
 {
 namespace
 {
-constexpr ImVec4 kAssigned{0.55f, 0.85f, 0.6f, 1.0f};
-constexpr ImVec4 kMuted{0.6f, 0.6f, 0.6f, 1.0f};
+constexpr ImVec4 kAssigned = theme::color::kGoldBright;
+constexpr ImVec4 kMuted = theme::color::kBoneDim;
 
 // Uma linha da lista da esquerda. `assigned` vem do override bruto, não do
 // resolvido: com o toggle global desligado o usuário ainda precisa ver o que
@@ -61,11 +63,11 @@ void draw_row(ModController& mod, OverlayState& state, const std::string& id,
 
 void draw_bosses_panel(ModController& mod, OverlayState& state)
 {
-    ImGui::TextUnformatted("Encontros");
+    theme::heading("Encontros");
     ImGui::SetNextItemWidth(-1.0f);
     ImGui::InputTextWithHint("##boss_query", "buscar (sem acento serve)", state.boss_query,
                              sizeof(state.boss_query));
-    ImGui::Checkbox("So os sem override", &state.only_unassigned);
+    theme::checkbox("So os sem override", &state.only_unassigned);
 
     ImGui::BeginChild("##boss_list");
     for (const auto* boss : mod.catalog().find_bosses(state.boss_query))

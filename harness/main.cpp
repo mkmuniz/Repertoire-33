@@ -28,6 +28,7 @@
 #include "Core/ModController.hpp"
 #include "Support/Log.hpp"
 #include "UI/Panels.hpp"
+#include "UI/Theme.hpp"
 
 namespace
 {
@@ -140,7 +141,10 @@ int main()
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+    // Mesmo estilo e mesma fonte que o mod usa em jogo. O harness só serve
+    // para julgar a aparência se for exatamente a mesma configuração.
+    e33::ui::theme::apply_style();
+    e33::ui::theme::load_fonts("assets");
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
@@ -183,7 +187,7 @@ int main()
         int height = 0;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
-        glClearColor(0.09f, 0.09f, 0.11f, 1.0f);
+        glClearColor(0.03f, 0.028f, 0.025f, 1.0f); // obsidiana, como o fundo do jogo
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);

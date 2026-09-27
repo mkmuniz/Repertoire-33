@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "UI/Theme.hpp"
+
 namespace e33::ui
 {
 void draw_diagnostics_panel(ModController& mod, OverlayState& state)
@@ -9,7 +11,7 @@ void draw_diagnostics_panel(ModController& mod, OverlayState& state)
     // Este painel existe por um motivo especifico: quando alguem disser "nao
     // funcionou no boss X", a resposta tem de estar aqui, sem pedir log.
     bool verbose = mod.settings().verbose_log;
-    if (ImGui::Checkbox("Log verboso", &verbose))
+    if (theme::checkbox("Log verboso", &verbose))
     {
         mod.set_verbose(verbose);
     }
@@ -22,7 +24,7 @@ void draw_diagnostics_panel(ModController& mod, OverlayState& state)
                                : "Hook de combate: NAO instalado (M0 pendente)");
 
     ImGui::Separator();
-    ImGui::TextUnformatted("Combates recentes");
+    theme::heading("Combates recentes");
 
     if (mod.swapper().history().empty())
     {
@@ -47,8 +49,8 @@ void draw_diagnostics_panel(ModController& mod, OverlayState& state)
             ImGui::TextUnformatted(entry.original_track.c_str());
             ImGui::TableNextColumn();
             const bool swapped = entry.reason == SwapReason::Applied;
-            ImGui::TextColored(swapped ? ImVec4{0.55f, 0.85f, 0.6f, 1.0f}
-                                       : ImVec4{0.6f, 0.6f, 0.6f, 1.0f},
+            ImGui::TextColored(swapped ? theme::color::kVerdigris
+                                       : theme::color::kBoneDim,
                                "%s", swapped ? entry.chosen_track.c_str()
                                              : entry.original_track.c_str());
             ImGui::TableNextColumn();

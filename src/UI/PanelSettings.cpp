@@ -5,6 +5,8 @@
 
 #include <imgui.h>
 
+#include "UI/Theme.hpp"
+
 namespace e33::ui
 {
 void draw_settings_panel(ModController& mod, OverlayState& state)
@@ -27,7 +29,7 @@ void draw_settings_panel(ModController& mod, OverlayState& state)
     if (!settings.hotkey_virtual_key())
     {
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4{1.0f, 0.55f, 0.55f, 1.0f}, "tecla nao reconhecida");
+        ImGui::TextColored(theme::color::kBlood, "tecla nao reconhecida");
     }
     ImGui::SameLine();
     ImGui::TextDisabled("(evite J: e do Gramophone Everywhere)");
@@ -39,13 +41,13 @@ void draw_settings_panel(ModController& mod, OverlayState& state)
         static_cast<void>(settings.save());
     }
 
-    if (ImGui::Checkbox("Abrir o overlay ao iniciar", &settings.start_open))
+    if (theme::checkbox("Abrir o overlay ao iniciar", &settings.start_open))
     {
         static_cast<void>(settings.save());
     }
 
     ImGui::Separator();
-    ImGui::TextUnformatted("Presets");
+    theme::heading("Presets");
     ImGui::TextWrapped("O preset tem o mesmo formato do config.json, so com os overrides: "
                        "da para compartilhar uma trilha alternativa inteira como um arquivo.");
 
@@ -75,7 +77,7 @@ void draw_settings_panel(ModController& mod, OverlayState& state)
     }
     else
     {
-        ImGui::TextColored(ImVec4{1.0f, 0.75f, 0.3f, 1.0f}, "Remover %zu override(s)?",
+        ImGui::TextColored(theme::color::kGold, "Remover %zu override(s)?",
                            mod.overrides().size());
         ImGui::SameLine();
         if (ImGui::Button("Sim, remover"))

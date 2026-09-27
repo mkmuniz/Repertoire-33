@@ -2,25 +2,29 @@
 
 #include <imgui.h>
 
+#include "UI/Theme.hpp"
+
 namespace e33::ui
 {
 void draw_tracks_panel(ModController& mod, OverlayState& state)
 {
     if (state.selected_encounter.empty())
     {
-        ImGui::TextUnformatted("Faixas");
+        theme::heading("Faixas");
         ImGui::TextWrapped("Escolha um encontro a esquerda para atribuir uma faixa.");
         return;
     }
 
     const auto boss_name = mod.catalog().boss_name(state.selected_encounter);
-    ImGui::Text("Faixa para %.*s", static_cast<int>(boss_name.size()), boss_name.data());
+    theme::heading("Faixa para");
+    ImGui::SameLine();
+    ImGui::TextUnformatted(boss_name.data(), boss_name.data() + boss_name.size());
 
     const auto current = mod.overrides().raw_track_for(state.selected_encounter);
     if (current)
     {
         const auto name = mod.catalog().track_name(*current);
-        ImGui::TextColored(ImVec4{0.55f, 0.85f, 0.6f, 1.0f}, "atual: %.*s",
+        ImGui::TextColored(theme::color::kVerdigris, "atual: %.*s",
                            static_cast<int>(name.size()), name.data());
         ImGui::SameLine();
         if (ImGui::SmallButton("Voltar ao original"))
@@ -55,7 +59,7 @@ void draw_tracks_panel(ModController& mod, OverlayState& state)
             // Uma faixa sem essa estrutura precisa vir marcada, senao o usuario
             // acha que o mod piorou o audio.
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4{1.0f, 0.75f, 0.3f, 1.0f}, "[loop simples]");
+            ImGui::TextColored(theme::color::kGold, "[loop simples]");
             if (ImGui::IsItemHovered())
             {
                 ImGui::SetTooltip("Sem a dinamica de intensidade da trilha original");
@@ -64,7 +68,7 @@ void draw_tracks_panel(ModController& mod, OverlayState& state)
         if (!track->source.empty())
         {
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4{0.6f, 0.6f, 0.6f, 1.0f}, "(%s)", track->source.c_str());
+            ImGui::TextColored(theme::color::kBoneDim, "(%s)", track->source.c_str());
         }
 
         ImGui::SameLine(ImGui::GetContentRegionAvail().x - 60.0f);

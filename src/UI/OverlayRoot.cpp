@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "UI/Theme.hpp"
+
 namespace e33::ui
 {
 namespace
@@ -13,6 +15,27 @@ void apply_font_scale(float scale)
 #else
     ImGui::GetIO().FontGlobalScale = scale;
 #endif
+}
+
+// Sublinhado dourado sob a aba ativa. O ImGui marca aba por retângulo
+// preenchido, que parece software; a marca por fio é o que a UI do jogo faz.
+void underline_active_tab()
+{
+    const auto min = ImGui::GetItemRectMin();
+    const auto max = ImGui::GetItemRectMax();
+    ImGui::GetWindowDrawList()->AddLine(
+        ImVec2{min.x, max.y}, ImVec2{max.x, max.y},
+        ImGui::ColorConvertFloat4ToU32(theme::color::kGold), 1.5f);
+}
+
+bool tab(const char* label)
+{
+    const bool open = ImGui::BeginTabItem(label);
+    if (open)
+    {
+        underline_active_tab();
+    }
+    return open;
 }
 } // namespace
 
@@ -26,65 +49,76 @@ void draw_overlay(ModController& mod, OverlayState& state)
     apply_font_scale(mod.settings().font_scale);
 
     // Sem flags de posição: arrastar, redimensionar e colapsar são do ImGui, e
-    // a posição fica no imgui.ini entre sessões. Não reimplementar isso.
-    //
-    // TODO(M4, verificar no PC): os nomes do jogo são franceses e o overlay
-    // depende do glyph range da fonte que o UE4SS carrega. Se "Sirène" sair
-    // como "Sirne" ou com caixas, é isso — e a correção é registrar a fonte com
-    // ImGuiIO::Fonts->GetGlyphRangesDefault() trocado por um range que inclua
-    // Latin-1 Supplement. O harness nativo não pega esse problema porque a
-    // fonte dele é outra.
+    // a posição fica no imgui.ini entre sessões.
     ImGui::SetNextWindowPos(ImVec2{40.0f, 40.0f}, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2{740.0f, 460.0f}, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Boss Music Swapper", &state.open))
+    ImGui::SetNextWindowSize(ImVec2{760.0f, 500.0f}, ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("REPERTOIRE", &state.open))
     {
         ImGui::End();
         return;
     }
 
-    // O toggle global fica no topo porque é o que o usuário procura com pressa:
-    // gravar um vídeo ou isolar um bug sem desinstalar o mod.
+    theme::window_ornaments();
+
+    // A barra de título já é a placa gravada com o nome; repetir o nome no
+    // corpo é ornamento redundante. Fica só a legenda.
+    theme::push_small_font();
+    theme::text_dim("substituicao de trilha em tempo de execucao");
+    theme::pop_font();
+
+    theme::rule();
+
+    // O toggle global no topo: é o que o usuário procura com pressa, para
+    // gravar vídeo ou isolar um bug sem desinstalar.
     bool enabled = mod.overrides().enabled();
-    if (ImGui::Checkbox("Overrides ativos", &enabled))
+    if (theme::checkbox("Overrides ativos", &enabled))
     {
         mod.set_enabled(enabled);
     }
     ImGui::SameLine();
-    ImGui::TextDisabled("(%zu configurado(s))", mod.overrides().size());
-
-    if (!enabled)
+    theme::push_small_font();
+    if (enabled)
     {
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4{1.0f, 0.75f, 0.3f, 1.0f}, "— jogo vanilla");
+        ImGui::PushStyleColor(ImGuiCol_Text, theme::color::kBoneDim);
+        ImGui::Text("%zu configurado(s)", mod.overrides().size());
+        ImGui::PopStyleColor();
     }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, theme::color::kGold);
+        ImGui::TextUnformatted("jogo vanilla");
+        ImGui::PopStyleColor();
+    }
+    theme::pop_font();
 
-    ImGui::SameLine(ImGui::GetContentRegionAvail().x - 150.0f);
-    if (ImGui::Button("Gravar"))
+    ImGui::SameLine(ImGui::GetContentRegionAvail().x - 170.0f);
+    if (theme::button("Gravar"))
     {
         static_cast<void>(mod.save_now());
     }
     ImGui::SameLine();
-    if (ImGui::Button("Recarregar"))
+    if (theme::button("Recarregar"))
     {
         static_cast<void>(mod.reload_now());
     }
 
     if (!mod.watcher().installed())
     {
-        ImGui::TextColored(ImVec4{1.0f, 0.55f, 0.55f, 1.0f},
-                           "Hook de combate nao instalado: as trocas nao vao acontecer em jogo.");
+        ImGui::PushStyleColor(ImGuiCol_Text, theme::color::kBlood);
+        ImGui::TextUnformatted(
+            "Hook de combate nao instalado: nenhuma troca vai ocorrer em jogo.");
+        ImGui::PopStyleColor();
     }
 
-    ImGui::Separator();
+    theme::rule();
 
-    if (ImGui::BeginTabBar("##tabs"))
+    if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_NoTooltip))
     {
-        if (ImGui::BeginTabItem("Bosses"))
+        if (tab("Encontros"))
         {
-            const float available = ImGui::GetContentRegionAvail().y - 28.0f;
-            if (ImGui::BeginChild("##left", ImVec2{ImGui::GetContentRegionAvail().x * 0.5f - 4.0f,
-                                                   available},
-                                  ImGuiChildFlags_Borders))
+            const float available = ImGui::GetContentRegionAvail().y - 30.0f;
+            const float half = ImGui::GetContentRegionAvail().x * 0.5f - 6.0f;
+            if (ImGui::BeginChild("##left", ImVec2{half, available}, ImGuiChildFlags_Borders))
             {
                 draw_bosses_panel(mod, state);
             }
@@ -98,12 +132,12 @@ void draw_overlay(ModController& mod, OverlayState& state)
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Diagnostico"))
+        if (tab("Diagnostico"))
         {
             draw_diagnostics_panel(mod, state);
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Ajustes"))
+        if (tab("Ajustes"))
         {
             draw_settings_panel(mod, state);
             ImGui::EndTabItem();
@@ -111,8 +145,10 @@ void draw_overlay(ModController& mod, OverlayState& state)
         ImGui::EndTabBar();
     }
 
-    ImGui::Separator();
-    ImGui::TextDisabled("%s", mod.status_line().c_str());
+    theme::rule();
+    theme::push_small_font();
+    theme::text_dim(mod.status_line());
+    theme::pop_font();
 
     ImGui::End();
 }
