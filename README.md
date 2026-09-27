@@ -45,12 +45,27 @@ Tested game version: _TBD_.
 
 ## Building
 
+The mod DLL needs Windows, MSVC and a UE4SS checkout:
+
 ```sh
 xmake f --ue4ss=C:/path/to/RE-UE4SS -m release
-xmake
+xmake build BossMusicSwapper
 ```
 
-Windows/MSVC only — the artifact is a DLL loaded by UE4SS.
+Everything else builds anywhere, and is how the project is developed off-Windows:
+
+```sh
+xmake f -y                      # fetches nlohmann_json, doctest, imgui, glfw
+xmake build tests && xmake run tests      # logic suite, no game needed
+xmake build harness && xmake run harness  # the overlay in a native window
+```
+
+The harness draws the same overlay the mod draws in-game, with a combat
+simulator standing in for the hook and a recording backend standing in for the
+game's audio. Sample fixtures live in `harness/sample/` and are deliberately
+separate from `data/` — their ids are invented.
+
+See [docs/DEV-MACOS.md](docs/DEV-MACOS.md) for the full split of what runs where.
 
 ## Roadmap
 

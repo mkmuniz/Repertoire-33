@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # A DLL do mod precisa do checkout do UE4SS, que não está disponível aqui.
+  # O que o CI cobre é a camada que o projeto isola de propósito: config,
+  # catálogo e decisão de troca. É exatamente onde os bugs de lógica moram.
+  tests:
+    name: tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Cache xmake packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.xmake
+          key: ${{ runner.os }}-xmake-${{ hashFiles('xmake.lua') }}
+
+      - name: Configure
+        run: xmake f -y -m release
+
+      - name: Build tests
+        run: xmake build -y tests
+
+      - name: Run tests
+        run: xmake run tests
