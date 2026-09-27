@@ -3,7 +3,9 @@
 Runtime boss-music override for **Clair Obscur: Expedition 33**, as a UE4SS C++ mod
 with a draggable in-game ImGui overlay.
 
-> **Status: pre-alpha (M0).** Not installable yet.
+> **Status: pre-alpha.** Not installable yet. The config, catalogue, decision
+> logic and UI are built and tested; the combat hook and the audio swap (M0/M2)
+> need the game running and are not done.
 
 ## Why this instead of a `.pak` replacement
 
@@ -69,15 +71,15 @@ See [docs/DEV-MACOS.md](docs/DEV-MACOS.md) for the full split of what runs where
 
 ## Roadmap
 
-| Milestone | Scope |
+| Milestone | State |
 |---|---|
-| M0 | Log the encounter id when combat starts |
-| M1 | `bosses.json` / `tracks.json` catalogue |
-| M2 | Hardcoded swap to a **native** game track |
-| M3 | JSON config, empty by default, hot reload |
-| M4 | ImGui overlay |
-| M5 | Verbose logging, presets, release |
-| M6 | External audio via Wwise `.wem` (optional) |
+| M0 — log the encounter id when combat starts | needs the game; `simulate()` stands in for it |
+| M1 — `bosses.json` / `tracks.json` catalogue | loader, search and "seen in game" done; real ids need the game |
+| M2 — swap to a **native** game track | decision logic done; the audio call needs the game |
+| M3 — JSON config, empty by default, hot reload | done |
+| M4 — ImGui overlay | done (in the harness; in-game ImGui registration unverified) |
+| M5 — verbose logging, presets, release | logging and presets done |
+| M6 — external audio via Wwise `.wem` | not started (optional) |
 
 Native tracks are preferred: the E33 soundtrack was written to soften during
 recovery windows and intensify at the climax of a fight. A flat external loop
