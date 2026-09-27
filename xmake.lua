@@ -17,6 +17,8 @@ add_rules("mode.debug", "mode.release")
 
 add_requires("nlohmann_json")
 add_requires("doctest")
+-- Só o harness nativo precisa de ImGui + GLFW; a DLL usa o ImGui do UE4SS.
+add_requires("imgui", {configs = {glfw = true, opengl3 = true}})
 
 option("ue4ss")
     set_default("")
@@ -70,3 +72,15 @@ target("tests")
     add_files(core_files)
     add_includedirs("src")
     add_packages("nlohmann_json", "doctest")
+
+target("harness")
+    set_kind("binary")
+    set_default(false) -- ferramenta de desenvolvimento, não entra no pacote
+    set_rundir("$(projectdir)") -- as fixtures sao lidas por caminho relativo
+    add_files("harness/*.cpp", "src/UI/*.cpp")
+    add_files(core_files)
+    add_includedirs("src")
+    add_packages("nlohmann_json", "imgui")
+    if is_plat("macosx") then
+        add_frameworks("OpenGL", "Cocoa", "IOKit", "CoreVideo")
+    end
