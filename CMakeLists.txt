@@ -39,9 +39,12 @@ FetchContent_Declare(minhook
     GIT_SHALLOW TRUE)
 
 # ImGui não traz CMakeLists próprio; vira uma biblioteca nossa logo abaixo.
+# Mesma versao que o xmake entrega ao harness. Divergir faria o overlay ser
+# julgado no harness sobre uma API diferente da que a DLL compila — e nomes de
+# flag mudaram entre versoes recentes (ImGuiChildFlags_Border -> Borders).
 FetchContent_Declare(imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG v1.91.5
+    GIT_TAG v1.92.9b-docking
     GIT_SHALLOW TRUE)
 
 FetchContent_MakeAvailable(nlohmann_json minhook imgui)

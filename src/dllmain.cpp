@@ -13,6 +13,9 @@
 #if defined(_WIN32)
 
 #include <Windows.h>
+// LPUNKNOWN e REFIID vem daqui: WIN32_LEAN_AND_MEAN corta o COM do Windows.h,
+// e a assinatura de DirectInput8Create usa os dois.
+#include <unknwn.h>
 
 namespace
 {
