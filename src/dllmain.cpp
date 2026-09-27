@@ -2,8 +2,8 @@
 
 #include <Mod/CppUserModBase.hpp>
 
-// Ponto de entrada exigido pelo UE4SS: ele chama start_mod() ao carregar a DLL
-// e uninstall_mod() ao descarregar.
+// Pontos de entrada exigidos pelo UE4SS: start_mod() ao carregar a DLL,
+// uninstall_mod() ao descarregar.
 #define BOSSMUSIC_API __declspec(dllexport)
 
 extern "C" {

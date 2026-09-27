@@ -1,17 +1,14 @@
 #pragma once
 
+#include <memory>
+
 #include <Mod/CppUserModBase.hpp>
 
-#include "Config/Overrides.hpp"
+#include "Core/ModController.hpp"
+#include "UI/OverlayState.hpp"
 
 namespace e33
 {
-// Janela ImGui do mod.
-//
-// TODO(M0, pré-requisito do plano): confirmar na doc da versão de UE4SS usada
-// como um mod C++ registra uma janela ImGui PRÓPRIA renderizada sobre o jogo,
-// em vez de uma aba na janela de debug do UE4SS (register_tab). Isso é
-// configurável e mudou entre versões — todo o resto depende dessa resposta.
 class BossMusicMod final : public RC::CppUserModBase
 {
 public:
@@ -22,9 +19,11 @@ public:
     void on_update() override;
 
 private:
-    void render_overlay();
+    void render();
+    void poll_hotkey();
 
-    OverrideTable m_overrides{};
-    bool m_overlay_open{false};
+    std::unique_ptr<ModController> m_mod;
+    ui::OverlayState m_overlay{};
+    bool m_hotkey_was_down{false};
 };
 } // namespace e33
