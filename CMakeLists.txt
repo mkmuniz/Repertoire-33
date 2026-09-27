@@ -85,7 +85,9 @@ endif()
 # Monta a árvore que o usuário extrai. Empacotar por install/CPack em vez de
 # script solto mantém a lista num lugar só: esquecer data/ ou a fonte gera um
 # mod que abre e não funciona.
-install(TARGETS ${TARGET} RUNTIME DESTINATION "Repertoire33")
+# A DLL na raiz do zip e o resto na subpasta: extrair tudo em Win64/ deixa a
+# DLL ao lado do executavel e os arquivos do mod separados.
+install(TARGETS ${TARGET} RUNTIME DESTINATION ".")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/data/" DESTINATION "Repertoire33/data")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/" DESTINATION "Repertoire33/assets")
 install(FILES

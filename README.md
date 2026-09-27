@@ -1,7 +1,7 @@
 # E33 Boss Music Swapper
 
-Runtime boss-music override for **Clair Obscur: Expedition 33**, as a UE4SS C++ mod
-with a draggable in-game ImGui overlay.
+Runtime boss-music override for **Clair Obscur: Expedition 33**, as a self-loading C++
+mod with a draggable in-game ImGui overlay. No mod loader required.
 
 ![The overlay](docs/images/overlay.png)
 
@@ -39,35 +39,50 @@ single file instead of a new mod.
 
 ## Installation
 
-**Requires** UE4SS installed in `Expedition 33\Sandfall\Binaries\Win64\`.
+No UE4SS needed — this mod loads itself. Grab `Repertoire33.zip` from
+[Releases](../../releases), or from the artifacts of the latest
+[CI run](../../actions).
 
-> **No release yet, and not for a reason in this repository.** Building any
-> UE4SS C++ mod requires `Re-UE4SS/UEPseudo`, a **private** repository that
-> RE-UE4SS needs as a submodule, and no SDK is published to link against
-> instead. See [docs/BUILD-BLOCKER.md](docs/BUILD-BLOCKER.md) for what was
-> checked and what the options are.
+1. In Steam: right-click the game → Manage → **Browse local files**, then open
+   `Sandfall\Binaries\Win64\`. That folder holds the game executable.
+2. Extract the whole zip **into that folder**. You end up with:
 
-1. Extract the `BossMusicSwapper` folder to
-   `Expedition 33\Sandfall\Binaries\Win64\ue4ss\Mods\BossMusicSwapper\`
-2. Add a `BossMusicSwapper : 1` line to `ue4ss\Mods\mods.txt`. The bundled
-   `enabled.txt` also works, but it bypasses mods.txt and gives up load ordering.
-3. Start the game. **Nothing changes yet** — the config starts empty.
-4. Press **F9** to open the menu.
-5. Pick an encounter on the left, a track on the right. Done.
+   ```
+   Win64\
+   ├── dinput8.dll          <- next to the executable, on purpose
+   └── Repertoire33\
+       ├── data\
+       ├── assets\
+       └── config.json
+   ```
 
-Tested game version: _TBD_.
+3. Start the game and press **F9**. Nothing changes until you create an override in the menu.
+
+`dinput8.dll` is a proxy: Windows loads it instead of the system copy, and every call
+is passed straight through. The two mods in this pair use different proxy names
+(dinput8.dll here), so they can sit in the same folder. If you would rather not
+replace a system DLL name, any DLL injector loads the same file unchanged.
+
+To uninstall, delete `dinput8.dll` and the `Repertoire33` folder.
 
 ## Building
 
-The mod DLL is CMake, built alongside RE-UE4SS — that is the flow UE4SS
-supports, and there is no import library to link against from outside:
+Every dependency is public, so the DLL builds with no account, token or private
+checkout — that was not true of the UE4SS route, see
+[docs/BUILD-BLOCKER.md](docs/BUILD-BLOCKER.md):
 
 ```sh
-# needs access to the private Re-UE4SS/UEPseudo submodule
-git clone --recursive https://github.com/UE4SS-RE/RE-UE4SS external/RE-UE4SS
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release   # Windows/MSVC
 cmake --build build
-cmake --build build --target package   # the installable zip
+cmake --build build --target package                 # the installable zip
+```
+
+Before pushing Windows code from a Mac or Linux box, syntax-check it without
+waiting on CI:
+
+```sh
+brew install mingw-w64       # or: apt install g++-mingw-w64-x86-64
+./tools/check-windows.sh
 ```
 
 Everything else builds anywhere, and is how the project is developed off-Windows:

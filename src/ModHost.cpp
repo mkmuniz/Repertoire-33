@@ -31,14 +31,15 @@ void ModHost::start(HMODULE module)
     // A pasta da DLL, não o diretório de trabalho: o diretório de trabalho de
     // um mod injetado é o do jogo.
     wchar_t buffer[MAX_PATH]{};
-    if (GetModuleFileNameW(module, buffer, MAX_PATH) != 0)
-    {
-        m_mod_dir = std::filesystem::path{buffer}.parent_path();
-    }
-    else
-    {
-        m_mod_dir = std::filesystem::current_path();
-    }
+    const auto dll_dir = GetModuleFileNameW(module, buffer, MAX_PATH) != 0
+                             ? std::filesystem::path{buffer}.parent_path()
+                             : std::filesystem::current_path();
+
+    // A DLL mora ao lado do executavel (e o que o proxy exige), mas os
+    // arquivos do mod ficam numa subpasta com o nome dele. Isso evita despejar
+    // config.json e data/ dentro da pasta do jogo, e evita que dois mods
+    // instalados juntos disputem os mesmos nomes de arquivo.
+    m_mod_dir = dll_dir / "Repertoire33";
 
     log::open_file(m_mod_dir / "BossMusicSwapper.log");
     log::info("carregando de {}", m_mod_dir.string());
