@@ -1,0 +1,11 @@
+{
+  "_note": "FIXTURE do harness nativo. Ids INVENTADOS.",
+  "tracks": [
+    {"id": "Track_Lumiere", "name": "Lumière", "source": "Act I", "dynamic": true},
+    {"id": "Track_UneVie", "name": "Une Vie à T'aimer", "source": "Act III", "dynamic": true},
+    {"id": "Track_Alicia", "name": "Alicia", "source": "Act II", "dynamic": true},
+    {"id": "Track_Renoir", "name": "Renoir", "source": "Act III", "dynamic": true},
+    {"id": "Track_Esquie", "name": "Esquie", "source": "Overworld", "dynamic": true},
+    {"id": "Track_Externa", "name": "Faixa do usuario (exemplo)", "source": "externa", "dynamic": false}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "_note": "FIXTURE do harness nativo, nao os dados do mod. Nomes plausiveis e ids INVENTADOS, so para o overlay ter o que desenhar no macOS. Os ids reais saem de DT_jRPG_Encounters no PC e vao para data/bosses.json.",
+  "bosses": [
+    {"id": "Boss_Sirene", "name": "Sirène", "group": "Act I"},
+    {"id": "Boss_Goblu", "name": "Goblu", "group": "Act I"},
+    {"id": "Boss_Eveque", "name": "Évêque", "group": "Act II"},
+    {"id": "Boss_Simon", "name": "Simon", "group": "Act III"},
+    {"id": "Boss_Clea", "name": "Clea", "group": "Optional"},
+    {"id": "Boss_Chateau", "name": "Château Noir", "group": "Optional"}
+  ]
+}
