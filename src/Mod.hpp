@@ -21,9 +21,11 @@ public:
 private:
     void render();
     void poll_hotkey();
+    void ensure_theme();
 
     std::unique_ptr<ModController> m_mod;
     ui::OverlayState m_overlay{};
     bool m_hotkey_was_down{false};
+    bool m_theme_applied{false};
 };
 } // namespace e33

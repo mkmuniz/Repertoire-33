@@ -1,8 +1,6 @@
 -- E33 Boss Music Swapper — UE4SS C++ mod
 --
--- Três targets:
---   BossMusicSwapper  DLL do mod. Windows/MSVC, precisa do checkout do UE4SS:
---                       xmake f --ue4ss=C:/path/to/RE-UE4SS && xmake
+-- Dois targets (a DLL do mod e CMake; ver CMakeLists.txt):
 --   tests             Testes da lógica pura. Roda em qualquer SO, sem o jogo:
 --                       xmake build tests && xmake run tests
 --   harness           Preview nativo do overlay em ImGui, sem o jogo:
@@ -20,12 +18,6 @@ add_requires("doctest")
 -- Só o harness nativo precisa de ImGui + GLFW; a DLL usa o ImGui do UE4SS.
 add_requires("imgui", {configs = {glfw = true, opengl3 = true}})
 
-option("ue4ss")
-    set_default("")
-    set_showmenu(true)
-    set_description("Caminho para o checkout do RE-UE4SS")
-option_end()
-
 -- Lógica que não conhece nem o Unreal nem o ImGui. Compartilhada pelos três
 -- targets, e é o que os testes cobrem.
 local core_files = {
@@ -37,34 +29,12 @@ local core_files = {
                                  -- caminho de teste sem o jogo
 }
 
-target("BossMusicSwapper")
-    set_kind("shared")
-    set_basename("main")
-    set_default(false) -- precisa de Windows + UE4SS; não entra no build padrão
-    set_enabled(is_plat("windows"))
-
-    add_files("src/dllmain.cpp", "src/Mod.cpp", "src/UI/*.cpp")
-    add_files("src/Hooks/AudioSwap.cpp") -- unica parte que fala com o audio do jogo
-    add_files(core_files)
-    add_includedirs("src")
-    add_packages("nlohmann_json")
-    add_defines("E33_WITH_UE4SS")
-
-    on_load(function (target)
-        local sdk = get_config("ue4ss")
-        if not sdk or sdk == "" then
-            return
-        end
-        target:add("includedirs", path.join(sdk, "UE4SS/include"))
-        target:add("includedirs", path.join(sdk, "deps/first/File/include"))
-        target:add("includedirs", path.join(sdk, "deps/first/DynamicOutput/include"))
-        target:add("includedirs", path.join(sdk, "deps/third/imgui"))
-    end)
-
-    if is_plat("windows") then
-        add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN")
-        add_cxflags("/utf-8", "/EHsc")
-    end
+-- A DLL do mod NAO e construida aqui.
+--
+-- O fluxo suportado pelo UE4SS e CMake, compilando o mod junto com o RE-UE4SS
+-- (add_subdirectory); nao ha import library publicada para linkar de fora. Ver
+-- CMakeLists.txt na raiz. Este arquivo cuida so dos alvos nativos, que rodam
+-- em qualquer sistema e nao precisam do jogo.
 
 target("tests")
     set_kind("binary")

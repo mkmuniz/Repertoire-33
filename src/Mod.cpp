@@ -7,6 +7,7 @@
 #include "Hooks/AudioSwap.hpp"
 #include "Support/Log.hpp"
 #include "UI/Panels.hpp"
+#include "UI/Theme.hpp"
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -118,6 +119,32 @@ void BossMusicMod::render()
     {
         return;
     }
+
+    ensure_theme();
     ui::draw_overlay(*m_mod, m_overlay);
+}
+
+void BossMusicMod::ensure_theme()
+{
+    if (m_theme_applied)
+    {
+        return;
+    }
+    m_theme_applied = true;
+
+    // O estilo e barato e pode ser aplicado a qualquer momento.
+    ui::theme::apply_style();
+
+    // TODO(verificar no PC): carregar fonte adiciona ao atlas do ImGui, e o
+    // atlas aqui e do UE4SS, nao nosso. Se o jogo travar ou a fonte nao
+    // aparecer na primeira abertura do overlay, a chamada precisa migrar para
+    // um callback do UE4SS que rode ANTES do NewFrame do quadro — nao de dentro
+    // do desenho. O overlay funciona com a fonte padrao de qualquer forma; o
+    // que se perde e o estilo e os acentos franceses.
+    if (!ui::theme::load_fonts(m_mod->mod_dir() / "assets"))
+    {
+        log::warn("fonte propria nao carregada; o overlay usa a fonte padrao e "
+                  "nomes como \"Sirene\" podem sair sem acento");
+    }
 }
 } // namespace e33

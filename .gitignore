@@ -13,4 +13,5 @@
 .vs/
 .xmake/
 build/
+external/
 imgui.ini

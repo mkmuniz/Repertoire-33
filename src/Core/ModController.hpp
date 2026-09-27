@@ -41,6 +41,7 @@ public:
     [[nodiscard]] CombatWatcher& watcher() { return m_watcher; }
     [[nodiscard]] IAudioBackend& audio() { return *m_audio; }
     [[nodiscard]] const std::string& status_line() const { return m_status; }
+    [[nodiscard]] const std::filesystem::path& mod_dir() const { return m_mod_dir; }
 
     // ---- ações da UI ----
     void set_override(std::string_view encounter_id, std::string_view track_id);
