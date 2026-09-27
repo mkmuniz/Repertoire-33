@@ -3,9 +3,12 @@
 Runtime boss-music override for **Clair Obscur: Expedition 33**, as a UE4SS C++ mod
 with a draggable in-game ImGui overlay.
 
-> **Status: pre-alpha.** Not installable yet. The config, catalogue, decision
-> logic and UI are built and tested; the combat hook and the audio swap (M0/M2)
-> need the game running and are not done.
+![The overlay](docs/images/overlay.png)
+
+> **Status: pre-alpha.** It builds, installs and opens. What it cannot do yet is
+> swap a track: the combat hook and the audio call (M0/M2) need the game running
+> and are not written. Everything around them — config, catalogue, decision
+> logic, overlay — is built and tested.
 
 ## Why this instead of a `.pak` replacement
 
@@ -37,6 +40,9 @@ single file instead of a new mod.
 
 **Requires** UE4SS installed in `Expedition 33\Sandfall\Binaries\Win64\`.
 
+Grab `Repertoire33.zip` from [Releases](../../releases), or from the artifacts
+of the latest [CI run](../../actions) if you want the current main.
+
 1. Extract the `BossMusicSwapper` folder to
    `Expedition 33\Sandfall\Binaries\Win64\ue4ss\Mods\BossMusicSwapper\`
 2. Add a `BossMusicSwapper : 1` line to `ue4ss\Mods\mods.txt`. The bundled
@@ -49,11 +55,14 @@ Tested game version: _TBD_.
 
 ## Building
 
-The mod DLL needs Windows, MSVC and a UE4SS checkout:
+The mod DLL is CMake, built alongside RE-UE4SS — that is the flow UE4SS
+supports, and there is no import library to link against from outside:
 
 ```sh
-xmake f --ue4ss=C:/path/to/RE-UE4SS -m release
-xmake build BossMusicSwapper
+git clone --recursive https://github.com/UE4SS-RE/RE-UE4SS external/RE-UE4SS
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64
+cmake --build build
+cmake --build build --target package   # the installable zip
 ```
 
 Everything else builds anywhere, and is how the project is developed off-Windows:
@@ -89,6 +98,22 @@ loses that.
 
 **The soundtrack is never distributed with this mod.** You supply your own files.
 
+## Interface
+
+The palette comes from the game's own material library — obsidian, black
+marble, gold — with gold used only as rule, border and highlight, mitred
+corners, letterspaced capitals and diamond fleurons. Text is EB Garamond, a
+French old-style shipped under the OFL: the game's own face is third-party and
+cannot be redistributed in a mod. Swap `assets/fonts/EBGaramond.ttf` for your
+own if you prefer; the overlay falls back to ImGui's default if it is missing.
+
+The screenshot above is generated, not hand-taken:
+
+```sh
+xmake run harness --shot shot.bmp --frames 40 --demo
+```
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Bundled font under the SIL OFL 1.1, see
+[assets/fonts/](assets/fonts/).
