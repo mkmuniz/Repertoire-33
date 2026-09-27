@@ -39,9 +39,11 @@ single file instead of a new mod.
 
 1. Extract the `BossMusicSwapper` folder to
    `Expedition 33\Sandfall\Binaries\Win64\ue4ss\Mods\BossMusicSwapper\`
-2. Start the game. **Nothing changes yet** — the config starts empty.
-3. Press **F9** to open the menu.
-4. Pick an encounter on the left, a track on the right. Done.
+2. Add a `BossMusicSwapper : 1` line to `ue4ss\Mods\mods.txt`. The bundled
+   `enabled.txt` also works, but it bypasses mods.txt and gives up load ordering.
+3. Start the game. **Nothing changes yet** — the config starts empty.
+4. Press **F9** to open the menu.
+5. Pick an encounter on the left, a track on the right. Done.
 
 Tested game version: _TBD_.
 
