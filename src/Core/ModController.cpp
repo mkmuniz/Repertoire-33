@@ -30,8 +30,7 @@ void ModController::initialize(const std::filesystem::path& mod_dir)
     m_watcher.set_callback([this](const CombatStartEvent& event) { on_combat_start(event); });
     m_watcher.install();
 
-    m_status = std::format("{} override(s), {} encontro(s) e {} faixa(s) no catalogo",
-                           m_overrides.size(), m_catalog.bosses().size(),
+    m_status = std::format("catalogo: {} encontro(s), {} faixa(s)", m_catalog.bosses().size(),
                            m_catalog.tracks().size());
     log::info("{}", m_status);
 }

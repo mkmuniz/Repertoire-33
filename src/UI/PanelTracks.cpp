@@ -53,25 +53,41 @@ void draw_tracks_panel(ModController& mod, OverlayState& state)
         ImGui::SameLine(6.0f);
         ImGui::TextUnformatted(track->name.c_str());
 
+        // Nome longo nao pode empurrar o botao nem passar por baixo dele. Em vez
+        // de quebrar a linha, os marcadores secundarios so aparecem se couberem:
+        // eles sao contexto, o nome e o botao sao o essencial.
+        const float button_x = ImGui::GetContentRegionMax().x - 62.0f;
+        const auto cursor_after = [] {
+            return ImGui::GetItemRectMax().x - ImGui::GetWindowPos().x;
+        };
+
         if (!track->dynamic)
         {
             // A trilha do E33 suaviza na recuperacao e intensifica no climax.
             // Uma faixa sem essa estrutura precisa vir marcada, senao o usuario
             // acha que o mod piorou o audio.
-            ImGui::SameLine();
-            ImGui::TextColored(theme::color::kGold, "[loop simples]");
-            if (ImGui::IsItemHovered())
+            constexpr const char* kFlat = "[loop simples]";
+            if (cursor_after() + ImGui::CalcTextSize(kFlat).x + 16.0f < button_x)
             {
-                ImGui::SetTooltip("Sem a dinamica de intensidade da trilha original");
+                ImGui::SameLine();
+                ImGui::TextColored(theme::color::kGold, "%s", kFlat);
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Sem a dinamica de intensidade da trilha original");
+                }
             }
         }
         if (!track->source.empty())
         {
-            ImGui::SameLine();
-            ImGui::TextColored(theme::color::kBoneDim, "(%s)", track->source.c_str());
+            const auto width = ImGui::CalcTextSize(track->source.c_str()).x;
+            if (cursor_after() + width + 24.0f < button_x)
+            {
+                ImGui::SameLine();
+                ImGui::TextColored(theme::color::kBoneDim, "(%s)", track->source.c_str());
+            }
         }
 
-        ImGui::SameLine(ImGui::GetContentRegionAvail().x - 60.0f);
+        ImGui::SameLine(button_x);
         if (ImGui::SmallButton("Ouvir"))
         {
             static_cast<void>(mod.preview(track->id));

@@ -8,7 +8,9 @@
 //   xmake build harness && xmake run harness
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -28,6 +30,7 @@
 #include "Core/ModController.hpp"
 #include "Support/Log.hpp"
 #include "UI/Panels.hpp"
+#include "Screenshot.hpp"
 #include "UI/Theme.hpp"
 
 namespace
@@ -116,8 +119,31 @@ void draw_simulator(e33::ModController& mod, const e33::RecordingAudioBackend& b
 }
 } // namespace
 
-int main()
+// --shot <arquivo.bmp> [--frames N] [--demo]
+// Renderiza N quadros, grava o framebuffer e sai. Serve para gerar a imagem do
+// README sem depender do foco de janela.
+int main(int argc, char** argv)
 {
+    std::string shot_path;
+    int shot_frame = 30;
+    bool demo = false;
+    for (int i = 1; i < argc; ++i)
+    {
+        const std::string arg = argv[i];
+        if (arg == "--shot" && i + 1 < argc)
+        {
+            shot_path = argv[++i];
+        }
+        else if (arg == "--frames" && i + 1 < argc)
+        {
+            shot_frame = std::atoi(argv[++i]);
+        }
+        else if (arg == "--demo")
+        {
+            demo = true;
+        }
+    }
+
     if (glfwInit() == 0)
     {
         std::fprintf(stderr, "glfwInit falhou\n");
@@ -128,8 +154,11 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "Boss Music Swapper — harness", nullptr,
-                                          nullptr);
+    // Em modo captura a janela encosta no overlay: a imagem do README tem de
+    // mostrar o mod, não a moldura do harness em volta dele.
+    const bool shot_mode = !shot_path.empty();
+    GLFWwindow* window = glfwCreateWindow(shot_mode ? 820 : 1280, shot_mode ? 560 : 800,
+                                          "Boss Music Swapper — harness", nullptr, nullptr);
     if (window == nullptr)
     {
         std::fprintf(stderr, "glfwCreateWindow falhou\n");
@@ -160,6 +189,18 @@ int main()
     int selected_boss = 0;
     int selected_original = 0;
 
+    if (demo)
+    {
+        // Estado de vitrine: dois overrides e um combate já observado, para a
+        // imagem mostrar o mod fazendo alguma coisa em vez de uma tela vazia.
+        mod.set_override("Boss_Sirene", "Track_UneVie");
+        mod.set_override("Boss_Simon", "Track_Renoir");
+        mod.watcher().simulate({"Boss_Sirene", "Track_Lumiere"});
+        overlay.selected_encounter = "Boss_Sirene";
+    }
+
+    int frame = 0;
+
     while (glfwWindowShouldClose(window) == 0)
     {
         glfwPollEvents();
@@ -169,7 +210,10 @@ int main()
 
         mod.tick(glfwGetTime());
         e33::ui::draw_overlay(mod, overlay);
-        draw_simulator(mod, *backend, selected_boss, selected_original);
+        if (!shot_mode)
+        {
+            draw_simulator(mod, *backend, selected_boss, selected_original);
+        }
 
         if (!overlay.open)
         {
@@ -190,6 +234,19 @@ int main()
         glClearColor(0.03f, 0.028f, 0.025f, 1.0f); // obsidiana, como o fundo do jogo
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        if (!shot_path.empty() && ++frame >= shot_frame)
+        {
+            std::vector<std::uint8_t> pixels(
+                static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u);
+            glPixelStorei(GL_PACK_ALIGNMENT, 1);
+            glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+            if (e33::harness::write_bmp(shot_path, width, height, pixels))
+            {
+                std::printf("screenshot: %s (%dx%d)\n", shot_path.c_str(), width, height);
+            }
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
+
         glfwSwapBuffers(window);
     }
 

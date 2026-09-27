@@ -50,8 +50,8 @@ void draw_overlay(ModController& mod, OverlayState& state)
 
     // Sem flags de posição: arrastar, redimensionar e colapsar são do ImGui, e
     // a posição fica no imgui.ini entre sessões.
-    ImGui::SetNextWindowPos(ImVec2{40.0f, 40.0f}, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2{760.0f, 500.0f}, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2{20.0f, 20.0f}, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2{780.0f, 520.0f}, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("REPERTOIRE", &state.open))
     {
         ImGui::End();

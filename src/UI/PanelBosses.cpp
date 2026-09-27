@@ -47,7 +47,7 @@ void draw_row(ModController& mod, OverlayState& state, const std::string& id,
 
         // "Voltar ao original" por linha: o plano trata isso como requisito, não
         // como conveniencia.
-        ImGui::SameLine(ImGui::GetContentRegionAvail().x - 24.0f);
+        ImGui::SameLine(ImGui::GetContentRegionMax().x - 26.0f);
         if (ImGui::SmallButton("x"))
         {
             mod.clear_override(id);
