@@ -5,7 +5,8 @@ with a draggable in-game ImGui overlay.
 
 ![The overlay](docs/images/overlay.png)
 
-> **Status: pre-alpha.** It builds, installs and opens. What it cannot do yet is
+> **Status: pre-alpha.** Not distributable yet — see the note under
+> Installation. What it cannot do yet is
 > swap a track: the combat hook and the audio call (M0/M2) need the game running
 > and are not written. Everything around them — config, catalogue, decision
 > logic, overlay — is built and tested.
@@ -40,8 +41,11 @@ single file instead of a new mod.
 
 **Requires** UE4SS installed in `Expedition 33\Sandfall\Binaries\Win64\`.
 
-Grab `Repertoire33.zip` from [Releases](../../releases), or from the artifacts
-of the latest [CI run](../../actions) if you want the current main.
+> **No release yet, and not for a reason in this repository.** Building any
+> UE4SS C++ mod requires `Re-UE4SS/UEPseudo`, a **private** repository that
+> RE-UE4SS needs as a submodule, and no SDK is published to link against
+> instead. See [docs/BUILD-BLOCKER.md](docs/BUILD-BLOCKER.md) for what was
+> checked and what the options are.
 
 1. Extract the `BossMusicSwapper` folder to
    `Expedition 33\Sandfall\Binaries\Win64\ue4ss\Mods\BossMusicSwapper\`
@@ -59,6 +63,7 @@ The mod DLL is CMake, built alongside RE-UE4SS — that is the flow UE4SS
 supports, and there is no import library to link against from outside:
 
 ```sh
+# needs access to the private Re-UE4SS/UEPseudo submodule
 git clone --recursive https://github.com/UE4SS-RE/RE-UE4SS external/RE-UE4SS
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64
 cmake --build build
