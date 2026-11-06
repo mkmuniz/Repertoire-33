@@ -30,6 +30,7 @@ local core_files = {
     "src/Unreal/Names.cpp",      -- e verificam sem o jogo
     "src/Unreal/Objects.cpp",
     "src/Unreal/Properties.cpp",
+    "src/Hooks/MusicPatcher.cpp", -- troca nos dados do jogo, testada sobre memoria sintetica
     "src/Hooks/CombatStart.cpp", -- compila nativo de proposito: simulate() e o
                                  -- caminho de teste sem o jogo
 }

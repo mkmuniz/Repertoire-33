@@ -72,11 +72,11 @@ private:
     std::size_t m_cursor{0};
 };
 
-// Um UObject: só o cabeçalho de UObjectBase, mais espaço livre para os testes
-// que precisam de campos de UStruct/UFunction além dele.
+// Um UObject: o cabeçalho de UObjectBase, mais espaço para os campos de
+// Blueprint que os testes usam (o battle manager do E33 vai até 0x9C0).
 struct FakeObject
 {
-    alignas(8) std::uint8_t bytes[0x100]{};
+    alignas(8) std::uint8_t bytes[0xC00]{};
 
     [[nodiscard]] std::uintptr_t address() const { return reinterpret_cast<std::uintptr_t>(bytes); }
 
@@ -84,6 +84,14 @@ struct FakeObject
     void put(std::size_t offset, T value)
     {
         std::memcpy(bytes + offset, &value, sizeof(T));
+    }
+
+    template <typename T>
+    [[nodiscard]] T get(std::size_t offset) const
+    {
+        T value{};
+        std::memcpy(&value, bytes + offset, sizeof(T));
+        return value;
     }
 };
 
@@ -164,6 +172,14 @@ public:
     void set_super(std::uintptr_t ustruct, std::uintptr_t super)
     {
         object(ustruct).put(0x40, super);
+    }
+
+    // O objeto morre: o Unreal zera o slot na tabela (a memória pode continuar lá).
+    void kill(std::uintptr_t address)
+    {
+        const auto index = object(address).get<std::int32_t>(0x0C);
+        std::memset(m_chunk.get() + static_cast<std::size_t>(index) * m_item_size, 0,
+                    sizeof(std::uintptr_t));
     }
 
     FakeNamePool names{};
