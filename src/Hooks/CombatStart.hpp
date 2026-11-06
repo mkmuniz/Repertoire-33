@@ -15,19 +15,22 @@ using CombatStartCallback = std::function<void(const CombatStartEvent&)>;
 
 // Observa o início de combate.
 //
-// M0 — o primeiro milestone do projeto: logar o id do encontro. A instalação do
-// hook é a única parte que precisa do jogo; `simulate()` existe para validar
-// toda a lógica acima sem entrar em combate de verdade, que é o "comando de
-// teste" que o plano pede no ambiente de desenvolvimento.
+// Em jogo quem detecta é o MusicPatcher — a borda None -> encontro em
+// AC_jRPG_BattleManager_C.EncounterName — e ele chama notify(). simulate() é o
+// mesmo caminho, para validar toda a lógica acima sem entrar em combate: é o
+// "comando de teste" que o plano pede no ambiente de desenvolvimento.
 class CombatWatcher
 {
 public:
     void set_callback(CombatStartCallback callback);
 
-    // Instala o hook de verdade. No-op fora do Windows.
-    // Devolve false se não achou o alvo do hook — e aí o log diz o que faltou.
-    bool install();
+    // Estado da integração com o jogo, para a UI. `detail` diz o que está
+    // ativo ou o que falta — "não funcionou" tem de ter resposta sem pedir log.
+    void set_status(bool installed, std::string detail);
     [[nodiscard]] bool installed() const { return m_installed; }
+    [[nodiscard]] const std::string& detail() const { return m_detail; }
+
+    void notify(const CombatStartEvent& event) const;
 
     // Dispara o pipeline como se o jogo tivesse iniciado um combate.
     void simulate(const CombatStartEvent& event) const;
@@ -35,5 +38,6 @@ public:
 private:
     CombatStartCallback m_callback{};
     bool m_installed{false};
+    std::string m_detail{"integracao com o jogo nao iniciada"};
 };
 } // namespace e33

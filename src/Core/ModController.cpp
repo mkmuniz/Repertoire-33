@@ -28,7 +28,6 @@ void ModController::initialize(const std::filesystem::path& mod_dir)
     m_overrides.load(mod_dir / "config.json");
 
     m_watcher.set_callback([this](const CombatStartEvent& event) { on_combat_start(event); });
-    m_watcher.install();
 
     m_status = std::format("catalogo: {} encontro(s), {} faixa(s)", m_catalog.bosses().size(),
                            m_catalog.tracks().size());
@@ -110,6 +109,13 @@ bool ModController::reload_now()
     m_status = ok ? std::format("config recarregada ({} override(s))", m_overrides.size())
                   : "nada para recarregar (arquivo ausente ou malformado)";
     return ok;
+}
+
+std::optional<std::string> ModController::music_for(std::string_view encounter_id,
+                                                    std::string_view original_track) const
+{
+    auto decision = m_swapper.decide(encounter_id, original_track);
+    return decision.swap ? std::optional{std::move(decision.track_id)} : std::nullopt;
 }
 
 bool ModController::preview(std::string_view track_id)

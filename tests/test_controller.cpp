@@ -222,3 +222,31 @@ TEST_CASE("falha do backend nao fica silenciosa")
 
     CHECK(controller.status_line().find("falhou") != std::string::npos);
 }
+
+TEST_CASE("music_for responde o que o patcher deve gravar, sem registrar historico")
+{
+    const test::TempDir dir;
+    write_mod_dir(dir, R"({"enabled": true, "overrides": {"Boss_Sirene": "Track_UneVie"}})");
+    Harness h{dir};
+
+    CHECK(h.controller.music_for("Boss_Sirene", "Track_Lumiere") == "Track_UneVie");
+    CHECK_FALSE(h.controller.music_for("Boss_Goblu", "Track_Lumiere").has_value());
+    // Ja e a faixa: nada a gravar.
+    CHECK_FALSE(h.controller.music_for("Boss_Sirene", "TRACK_UNEVIE").has_value());
+
+    h.controller.set_enabled(false);
+    CHECK_FALSE(h.controller.music_for("Boss_Sirene", "Track_Lumiere").has_value());
+
+    // Pergunta a cada tick: nao pode encher o painel de diagnostico.
+    CHECK(h.controller.swapper().history().empty());
+}
+
+TEST_CASE("integracao com o jogo comeca inativa e diz por que")
+{
+    const test::TempDir dir;
+    write_mod_dir(dir);
+    Harness h{dir};
+
+    CHECK_FALSE(h.controller.watcher().installed());
+    CHECK_FALSE(h.controller.watcher().detail().empty());
+}
