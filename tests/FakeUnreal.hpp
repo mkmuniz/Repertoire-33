@@ -6,7 +6,9 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Unreal/Names.hpp"
@@ -127,9 +129,56 @@ public:
         return reinterpret_cast<std::uintptr_t>(m_array);
     }
 
+    // Acrescenta um FProperty ao fim de ChildProperties de `owner` (um UStruct).
+    std::uintptr_t add_field(std::uintptr_t owner, std::string_view name, std::string_view type,
+                             std::int32_t offset, std::int32_t size, std::uintptr_t inner = 0)
+    {
+        auto field = std::make_unique<FakeObject>();
+        field->put(0x08, field_class(type));
+        field->put(0x20, unreal::FName{names.add(name), 0});
+        field->put(0x34, size);
+        field->put(0x44, offset);
+        field->put(0x70, inner);
+        const auto address = field->address();
+
+        // Encadeia no fim da lista, como o Unreal mantém a ordem de declaração.
+        std::uintptr_t* link = reinterpret_cast<std::uintptr_t*>(object(owner).bytes + 0x50);
+        while (*link != 0)
+        {
+            link = reinterpret_cast<std::uintptr_t*>(*link + 0x18);
+        }
+        *link = address;
+        m_fields.push_back(std::move(field));
+        return address;
+    }
+
+    void set_super(std::uintptr_t ustruct, std::uintptr_t super)
+    {
+        object(ustruct).put(0x40, super);
+    }
+
     FakeNamePool names{};
 
 private:
+    std::uintptr_t field_class(std::string_view type)
+    {
+        for (const auto& [name, klass] : m_field_classes)
+        {
+            if (name == type)
+            {
+                return klass->address();
+            }
+        }
+        auto klass = std::make_unique<FakeObject>();
+        klass->put(0x00, unreal::FName{names.add(type), 0});
+        const auto address = klass->address();
+        m_field_classes.emplace_back(std::string{type}, std::move(klass));
+        return address;
+    }
+
+    std::vector<std::unique_ptr<FakeObject>> m_fields{};
+    std::vector<std::pair<std::string, std::unique_ptr<FakeObject>>> m_field_classes{};
+
     template <typename T>
     void put_array(std::size_t offset, T value)
     {
