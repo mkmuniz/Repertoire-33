@@ -94,9 +94,37 @@ bool is_readable(const void* address, std::size_t size)
     }
     return true;
 }
+
+#if defined(_MSC_VER)
+// Sem objetos C++ no corpo: é a condição para __try conviver com /EHsc.
+bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
+{
+    __try
+    {
+        std::memcpy(out, reinterpret_cast<const void*>(address), size);
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
+#else
+bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
+{
+    if (!is_readable(reinterpret_cast<const void*>(address), size))
+    {
+        return false;
+    }
+    std::memcpy(out, reinterpret_cast<const void*>(address), size);
+    return true;
+}
+#endif
 } // namespace e33::unreal
 
 #else // !_WIN32
+
+#include <cstring>
 
 namespace e33::unreal
 {
@@ -107,6 +135,16 @@ std::optional<Image> main_image() { return std::nullopt; }
 bool is_readable(const void* address, std::size_t size)
 {
     return address != nullptr && size != 0;
+}
+
+bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
+{
+    if (!is_readable(reinterpret_cast<const void*>(address), size))
+    {
+        return false;
+    }
+    std::memcpy(out, reinterpret_cast<const void*>(address), size);
+    return true;
 }
 } // namespace e33::unreal
 

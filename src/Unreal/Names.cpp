@@ -1,5 +1,6 @@
 #include "Unreal/Names.hpp"
 
+#include <array>
 #include <format>
 #include <string_view>
 
@@ -60,30 +61,21 @@ std::optional<std::string> read_entry(std::uintptr_t blocks, std::uint32_t index
     }
 
     const auto chars = *base + offset + sizeof(std::uint16_t);
-    const std::size_t bytes = static_cast<std::size_t>(length) * (wide ? 2 : 1);
-    if (!is_readable(reinterpret_cast<const void*>(chars), bytes))
+    std::array<std::uint8_t, kMaxLength * 2> raw{};
+    if (!copy_memory(raw.data(), chars, static_cast<std::size_t>(length) * (wide ? 2 : 1)))
     {
         return std::nullopt;
     }
 
     std::string out;
     out.reserve(length);
-    if (wide)
-    {
-        const auto* utf16 = reinterpret_cast<const char16_t*>(chars);
-        for (std::uint16_t i = 0; i < length; ++i)
-        {
-            append_utf8(out, utf16[i]);
-        }
-    }
-    else
+    for (std::uint16_t i = 0; i < length; ++i)
     {
         // Narrow é Latin-1, não UTF-8: "è" ocupa um byte.
-        const auto* latin1 = reinterpret_cast<const unsigned char*>(chars);
-        for (std::uint16_t i = 0; i < length; ++i)
-        {
-            append_utf8(out, latin1[i]);
-        }
+        const std::uint32_t cp = wide ? static_cast<std::uint32_t>(raw[i * 2])
+                                            | (static_cast<std::uint32_t>(raw[i * 2 + 1]) << 8)
+                                      : raw[i];
+        append_utf8(out, cp);
     }
     return out;
 }

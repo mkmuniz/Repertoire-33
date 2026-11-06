@@ -42,18 +42,25 @@ struct Image
 // Lê os cabeçalhos PE do executável do processo. nullopt fora do Windows.
 [[nodiscard]] std::optional<Image> main_image();
 
-// true se [address, address+size) está mapeado e legível. Ler memória do jogo
-// sem checar derruba o processo no primeiro ponteiro inválido — e um mod de
-// música não pode, em nenhum caso, fechar o jogo.
+// true se [address, address+size) está mapeado e legível.
 [[nodiscard]] bool is_readable(const void* address, std::size_t size);
+
+// Copia `size` bytes do jogo para `out`; false se algum byte não é legível.
+// Ler memória do jogo sem proteção derruba o processo no primeiro ponteiro
+// inválido — e um mod de música não pode, em nenhum caso, fechar o jogo.
+//
+// No MSVC é um __try (SEH): sem syscall, então serve para varrer centenas de
+// milhares de objetos. Nos outros compiladores cai no is_readable.
+[[nodiscard]] bool copy_memory(void* out, std::uintptr_t address, std::size_t size);
 
 template <typename T>
 [[nodiscard]] std::optional<T> read(std::uintptr_t address)
 {
-    if (!is_readable(reinterpret_cast<const void*>(address), sizeof(T)))
+    T value{};
+    if (address == 0 || !copy_memory(&value, address, sizeof(T)))
     {
         return std::nullopt;
     }
-    return *reinterpret_cast<const T*>(address);
+    return value;
 }
 } // namespace e33::unreal
