@@ -25,6 +25,7 @@ local core_files = {
     "src/Config/*.cpp",
     "src/Data/*.cpp",
     "src/Core/*.cpp",
+    "src/Unreal/Pattern.cpp",    -- puro: so olha buffers, testado fora do Windows
     "src/Hooks/CombatStart.cpp", -- compila nativo de proposito: simulate() e o
                                  -- caminho de teste sem o jogo
 }
