@@ -25,7 +25,9 @@ local core_files = {
     "src/Config/*.cpp",
     "src/Data/*.cpp",
     "src/Core/*.cpp",
-    "src/Unreal/Pattern.cpp",    -- puro: so olha buffers, testado fora do Windows
+    "src/Unreal/Pattern.cpp",    -- leitores do Unreal: so olham memoria, entao
+    "src/Unreal/Memory.cpp",     -- os testes montam o layout do UE5 num buffer
+    "src/Unreal/Names.cpp",      -- e verificam sem o jogo
     "src/Hooks/CombatStart.cpp", -- compila nativo de proposito: simulate() e o
                                  -- caminho de teste sem o jogo
 }
