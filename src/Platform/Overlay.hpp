@@ -19,14 +19,21 @@ namespace e33::platform
 // existe e ainda não foi usado.
 using InitFn = std::function<void()>;
 
-// Chamado a cada quadro, entre NewFrame e Render.
+// Chamado a cada quadro, entre NewFrame e Render. Roda na thread do Present
+// (render/RHI), não na do jogo: nada de ler ou escrever objetos do Unreal aqui.
 using RenderFn = std::function<void()>;
+
+// Chamado ~10 vezes por segundo na GAME THREAD, via WM_TIMER na janela do
+// jogo. É o único lugar certo para tocar objetos do Unreal. Funciona mesmo que
+// o overlay não consiga desenhar.
+using TickFn = std::function<void()>;
 
 struct Config
 {
     std::filesystem::path mod_dir{};
     InitFn on_first_frame{};
     RenderFn on_render{};
+    TickFn on_game_tick{};
 };
 
 // Instala os hooks. Devolve false se não conseguiu descobrir a swapchain — e

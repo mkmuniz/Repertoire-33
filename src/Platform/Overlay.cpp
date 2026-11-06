@@ -54,6 +54,14 @@ ExecuteCommandListsFn g_execute_original{nullptr};
 HWND g_window{nullptr};
 WNDPROC g_original_wndproc{nullptr};
 
+// Tick da game thread. O Unreal bombeia as mensagens da janela na game thread
+// a cada quadro, então um WM_TIMER na janela do jogo é executado exatamente
+// onde o jogo lê os próprios objetos — sem hook em função do engine.
+constexpr UINT_PTR kGameTickTimer = 0xE33B;
+constexpr UINT kGameTickMs = 100;
+bool g_timer_armed{false}; // só a game thread toca
+std::atomic<bool> g_shutting_down{false};
+
 // D3D11
 ID3D11Device* g_d3d11_device{nullptr};
 ID3D11DeviceContext* g_d3d11_context{nullptr};
@@ -79,6 +87,21 @@ std::array<bool, 256> g_key_was_down{};
 
 LRESULT CALLBACK hooked_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+    // SetTimer exige a thread dona da janela: é a primeira mensagem que chega
+    // por aqui, então é aqui que o timer nasce.
+    if (!g_timer_armed && SetTimer(hwnd, kGameTickTimer, kGameTickMs, nullptr) != 0)
+    {
+        g_timer_armed = true;
+    }
+    if (msg == WM_TIMER && wparam == kGameTickTimer)
+    {
+        if (g_config.on_game_tick && !g_shutting_down.load(std::memory_order_acquire))
+        {
+            g_config.on_game_tick();
+        }
+        return 0; // o timer é nosso; o jogo não deve vê-lo
+    }
+
     if (g_initialized.load(std::memory_order_acquire))
     {
         ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
@@ -204,6 +227,62 @@ bool setup_d3d12(IDXGISwapChain3* swapchain)
     return true;
 }
 
+// Chamar com g_init_mutex. Uma janela só: a do jogo.
+void subclass_window(HWND window)
+{
+    if (g_original_wndproc != nullptr)
+    {
+        if (window != g_window)
+        {
+            log::warn("swapchain desenha numa janela diferente da do jogo; mantendo a primeira");
+        }
+        return;
+    }
+    // O original é lido ANTES da troca: a game thread pode entregar uma
+    // mensagem ao hook no instante seguinte, e ele precisa saber para onde
+    // repassar.
+    g_window = window;
+    g_original_wndproc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(window, GWLP_WNDPROC));
+    SetWindowLongPtrW(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(hooked_wndproc));
+}
+
+BOOL CALLBACK match_game_window(HWND window, LPARAM out)
+{
+    DWORD pid = 0;
+    GetWindowThreadProcessId(window, &pid);
+    wchar_t name[32]{};
+    if (pid == GetCurrentProcessId() && IsWindowVisible(window)
+        && GetClassNameW(window, name, 32) > 0 && lstrcmpW(name, L"UnrealWindow") == 0)
+    {
+        *reinterpret_cast<HWND*>(out) = window;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// A troca de música não pode depender do overlay: se o hook de D3D falhar,
+// editar o config.json à mão ainda tem de funcionar. Por isso a janela é
+// enganchada assim que existir, sem esperar o primeiro Present.
+DWORD WINAPI wait_for_game_window(LPVOID)
+{
+    constexpr int kAttempts = 600; // 600 x 250 ms: o jogo tem 2,5 min para abrir a janela
+    for (int i = 0; i < kAttempts && !g_shutting_down.load(); ++i)
+    {
+        HWND window{nullptr};
+        EnumWindows(match_game_window, reinterpret_cast<LPARAM>(&window));
+        if (window != nullptr)
+        {
+            const std::lock_guard lock{g_init_mutex};
+            subclass_window(window);
+            log::info("janela do jogo encontrada; tick da game thread ativo");
+            return 0;
+        }
+        Sleep(250);
+    }
+    log::warn("janela do jogo nao apareceu; a troca de musica fica inativa");
+    return 0;
+}
+
 bool initialize(IDXGISwapChain* swapchain)
 {
     const std::lock_guard lock{g_init_mutex};
@@ -217,12 +296,11 @@ bool initialize(IDXGISwapChain* swapchain)
     {
         return false;
     }
-    g_window = desc.OutputWindow;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::GetIO().IniFilename = nullptr; // posição vai para o nosso próprio arquivo
-    ImGui_ImplWin32_Init(g_window);
+    ImGui_ImplWin32_Init(desc.OutputWindow);
 
     // O jogo é UE5, então D3D12 é o caminho provável; D3D11 existe porque o
     // usuário pode forçar -dx11 na linha de comando.
@@ -253,9 +331,7 @@ bool initialize(IDXGISwapChain* swapchain)
         return false;
     }
 
-    g_original_wndproc = reinterpret_cast<WNDPROC>(
-        SetWindowLongPtrW(g_window, GWLP_WNDPROC,
-                          reinterpret_cast<LONG_PTR>(hooked_wndproc)));
+    subclass_window(desc.OutputWindow);
 
     if (g_config.on_first_frame)
     {
@@ -511,6 +587,13 @@ bool install(Config config)
 {
     g_config = std::move(config);
 
+    // Antes do D3D, e independente dele: a troca de música só precisa do tick.
+    if (HANDLE thread = CreateThread(nullptr, 0, wait_for_game_window, nullptr, 0, nullptr);
+        thread != nullptr)
+    {
+        CloseHandle(thread);
+    }
+
     if (MH_Initialize() != MH_OK)
     {
         log::warn("MinHook nao inicializou");
@@ -554,6 +637,11 @@ bool install(Config config)
 
 void uninstall()
 {
+    g_shutting_down.store(true, std::memory_order_release);
+    if (g_window != nullptr)
+    {
+        KillTimer(g_window, kGameTickTimer);
+    }
     MH_DisableHook(MH_ALL_HOOKS);
     MH_Uninitialize();
 
