@@ -87,6 +87,25 @@ TEST_CASE("find sobe pela hierarquia e devolve offset, tamanho e tipo")
     CHECK_FALSE(properties.find(w.boss, "Inexistente").has_value());
 }
 
+TEST_CASE("find_path soma os offsets ao descer por structs aninhadas")
+{
+    const World w;
+    const auto objects = w.objects();
+    const Properties properties{objects};
+
+    const auto music = properties.find_path(w.boss, {"BattleMusicParameters", "Music"});
+    REQUIRE(music.has_value());
+    CHECK(music->offset == 0x830);
+    CHECK(music->size == 0x28);
+    CHECK(music->type == "SoftObjectProperty");
+
+    // Descer por um campo que nao e struct, ou por um struct sem UScriptStruct,
+    // falha em vez de ler lixo.
+    CHECK_FALSE(properties.find_path(w.boss, {"BattleMusicParameters", "Music", "X"}).has_value());
+    CHECK_FALSE(properties.find_path(w.boss, {"SelectedEncounter", "RowName"}).has_value());
+    CHECK_FALSE(properties.find_path(w.boss, {"BattleMusicParameters", "Nada"}).has_value());
+}
+
 TEST_CASE("is_a reconhece subclasse e recusa o caminho inverso")
 {
     const World w;

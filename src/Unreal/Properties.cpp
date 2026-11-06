@@ -84,6 +84,36 @@ std::optional<Property> Properties::find(std::uintptr_t ustruct, std::string_vie
     return std::nullopt;
 }
 
+std::optional<Property> Properties::find_path(std::uintptr_t ustruct,
+                                              std::initializer_list<std::string_view> path) const
+{
+    std::optional<Property> result{};
+    std::int32_t offset = 0;
+    for (const auto name : path)
+    {
+        if (result)
+        {
+            // Descer exige que o campo anterior seja um struct.
+            if (result->type != "StructProperty")
+            {
+                return std::nullopt;
+            }
+            ustruct = struct_of(*result);
+        }
+        result = find(ustruct, name);
+        if (!result || result->offset < 0)
+        {
+            return std::nullopt;
+        }
+        offset += result->offset;
+    }
+    if (result)
+    {
+        result->offset = offset;
+    }
+    return result;
+}
+
 std::uintptr_t Properties::struct_of(const Property& property)
 {
     return read<std::uintptr_t>(property.address + field_layout::kStruct).value_or(0);

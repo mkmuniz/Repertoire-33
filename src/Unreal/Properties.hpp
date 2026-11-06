@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <initializer_list>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -54,6 +55,12 @@ public:
 
     // Procura em `ustruct` e nas superclasses.
     [[nodiscard]] std::optional<Property> find(std::uintptr_t ustruct, std::string_view name) const;
+
+    // Desce por structs aninhadas: {"Battle_Start_Params", "MusicParameters",
+    // "Music"}. O offset devolvido é a soma, relativo ao início de `ustruct`;
+    // nome e tipo são os do último campo.
+    [[nodiscard]] std::optional<Property> find_path(std::uintptr_t ustruct,
+                                                    std::initializer_list<std::string_view> path) const;
 
     // Struct de um StructProperty (para descer em FS_MusicParameters etc.).
     [[nodiscard]] static std::uintptr_t struct_of(const Property& property);

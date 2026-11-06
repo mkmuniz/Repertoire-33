@@ -53,6 +53,9 @@ struct Image
 // milhares de objetos. Nos outros compiladores cai no is_readable.
 [[nodiscard]] bool copy_memory(void* out, std::uintptr_t address, std::size_t size);
 
+// O inverso: grava `size` bytes de `data` no jogo. false se a página não aceita.
+[[nodiscard]] bool write_memory(std::uintptr_t address, const void* data, std::size_t size);
+
 template <typename T>
 [[nodiscard]] std::optional<T> read(std::uintptr_t address)
 {
@@ -62,5 +65,11 @@ template <typename T>
         return std::nullopt;
     }
     return value;
+}
+
+template <typename T>
+[[nodiscard]] bool write(std::uintptr_t address, const T& value)
+{
+    return address != 0 && write_memory(address, &value, sizeof(T));
 }
 } // namespace e33::unreal

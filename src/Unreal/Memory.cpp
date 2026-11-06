@@ -109,6 +109,19 @@ bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
         return false;
     }
 }
+
+bool write_memory(std::uintptr_t address, const void* data, std::size_t size)
+{
+    __try
+    {
+        std::memcpy(reinterpret_cast<void*>(address), data, size);
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
 #else
 bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
 {
@@ -117,6 +130,20 @@ bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
         return false;
     }
     std::memcpy(out, reinterpret_cast<const void*>(address), size);
+    return true;
+}
+
+// Só a checagem de sintaxe do mingw passa por aqui; a DLL distribuída é MSVC.
+bool write_memory(std::uintptr_t address, const void* data, std::size_t size)
+{
+    MEMORY_BASIC_INFORMATION info{};
+    if (VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0
+        || info.State != MEM_COMMIT
+        || (info.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE)) == 0)
+    {
+        return false;
+    }
+    std::memcpy(reinterpret_cast<void*>(address), data, size);
     return true;
 }
 #endif
@@ -144,6 +171,16 @@ bool copy_memory(void* out, std::uintptr_t address, std::size_t size)
         return false;
     }
     std::memcpy(out, reinterpret_cast<const void*>(address), size);
+    return true;
+}
+
+bool write_memory(std::uintptr_t address, const void* data, std::size_t size)
+{
+    if (address == 0 || size == 0)
+    {
+        return false;
+    }
+    std::memcpy(reinterpret_cast<void*>(address), data, size);
     return true;
 }
 } // namespace e33::unreal
