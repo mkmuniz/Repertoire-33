@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "Data/Catalog.hpp"
 #include "Support/Log.hpp"
 
 namespace e33
@@ -334,9 +335,16 @@ void MusicPatcher::update_music(Source& source)
     m_original_by_encounter[encounter] = original_text;
     if (!source.original->empty())
     {
-        // Toda faixa vista no jogo fica resolvível, mesmo que não esteja no pool
-        // com a grafia do catálogo.
-        m_resolved.try_emplace(lowercase(original_text), *source.original);
+        // Toda faixa vista no jogo fica resolvível — inclusive uma que a busca
+        // no pool tinha dado como ausente: o que o jogo usa é a prova.
+        auto key = lowercase(original_text);
+        if (const auto it = m_resolved.find(key); it == m_resolved.end() || !it->second)
+        {
+            m_resolved.insert_or_assign(std::move(key), *source.original);
+            std::erase_if(m_missing, [&original_text](const std::string& missing) {
+                return same_track_id(missing, original_text);
+            });
+        }
     }
 
     auto target = *source.original;
@@ -376,13 +384,15 @@ void MusicPatcher::watch_battle(Source& source, std::vector<CombatStartEvent>& s
         {
             m_current_battle = source.object;
 
-            // O id que vale é o RowName dos parâmetros: é o mesmo que as fontes
-            // usam, então um override criado a partir dele acerta a fonte.
-            auto encounter = m_objects.names().to_string(
-                read<FName>(source.object + info.encounter_row).value_or(name));
-            if (encounter == "None")
+            // O id é o próprio EncounterName: é ele que acabou de mudar, então
+            // é da luta atual. As fontes usam o RowName da linha do encontro,
+            // que deveria ser o mesmo texto; se não for, o log diz.
+            auto encounter = m_objects.names().to_string(name);
+            if (const auto row = read<FName>(source.object + info.encounter_row);
+                row && row->comparison_index != 0 && !(*row == name))
             {
-                encounter = m_objects.names().to_string(name);
+                log::warn("EncounterName \"{}\" difere do RowName dos parametros \"{}\"",
+                          encounter, m_objects.names().to_string(*row));
             }
 
             std::string original;

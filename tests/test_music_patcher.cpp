@@ -370,3 +370,42 @@ TEST_CASE("classe com campo de tipo inesperado e ignorada em vez de escrita as c
 
     CHECK(h.patcher.stats().enemies == 0);
 }
+
+TEST_CASE("faixa dada como ausente volta a valer quando o jogo a usa em algum objeto")
+{
+    E33World w;
+    const auto enemy = w.add_enemy("GO_Goblu", w.goblu_track);
+    Harness h{w};
+    constexpr const char* kLater = "/Game/Audio/MetaSound/Music/Tracks/Clea_Workshop/"
+                                   "MUS_Track_CleaWorkshop_BT_Clea.MUS_Track_CleaWorkshop_BT_Clea";
+    h.overrides["GO_Goblu"] = kLater;
+    h.run();
+    REQUIRE(h.patcher.missing_tracks().size() == 1);
+    CHECK(E33World::music_at(w.fake.object(enemy), 0x830) == w.goblu_track);
+
+    // Um nivel carrega um inimigo que usa essa faixa: agora ela existe.
+    const auto clea = w.path_names(kLater);
+    w.add_enemy("CFH_Boss_Clea", clea);
+    // A fonte que revela a faixa pode ser visitada depois da que a pede.
+    h.run();
+    h.run();
+
+    CHECK(h.patcher.missing_tracks().empty());
+    CHECK(E33World::music_at(w.fake.object(enemy), 0x830) == clea);
+}
+
+TEST_CASE("o id do combate e o EncounterName, mesmo com parametros da luta anterior")
+{
+    E33World w;
+    const auto manager = w.fake.add("AC_jRPG_BattleManager_C_0", w.manager_class, w.game);
+    Harness h{w};
+    h.run();
+
+    auto& bm = w.fake.object(manager);
+    bm.put(0x4C8 + 8, w.name("WM_Sprong")); // sobra da luta anterior
+    bm.put(0x190, w.name("CFH_Boss_Clea"));
+    h.run();
+
+    REQUIRE(h.battles.size() == 1);
+    CHECK(h.battles.front().encounter_id == "CFH_Boss_Clea");
+}
