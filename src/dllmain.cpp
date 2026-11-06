@@ -25,7 +25,17 @@ DWORD WINAPI bootstrap(LPVOID module)
 {
     // Fora do loader lock: DllMain não pode carregar outras DLLs nem criar
     // dispositivos D3D, e a instalação dos hooks faz as duas coisas.
-    e33::ModHost::instance().start(static_cast<HMODULE>(module));
+    //
+    // Exceção saindo de uma thread encerra o processo. Um mod que não sobe é
+    // aceitável; um mod que fecha o jogo, não.
+    try
+    {
+        e33::ModHost::instance().start(static_cast<HMODULE>(module));
+    }
+    catch (...)
+    {
+        OutputDebugStringW(L"Repertoire33: falha ao iniciar; o jogo segue sem o mod\n");
+    }
     return 0;
 }
 } // namespace

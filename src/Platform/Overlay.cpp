@@ -5,6 +5,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <exception>
 #include <mutex>
 #include <vector>
 
@@ -62,6 +63,31 @@ constexpr UINT kGameTickMs = 100;
 bool g_timer_armed{false}; // só a game thread toca
 std::atomic<bool> g_shutting_down{false};
 
+// Exceção de C++ atravessando um frame do Windows ou do jogo derruba o
+// processo. Cada callback nosso roda guardado; na primeira exceção, aquela
+// parte desliga para sempre e o jogo segue vanilla.
+bool g_tick_failed{false};   // só a game thread toca
+std::atomic<bool> g_render_failed{false}; // escrito no Present, lido no WndProc
+
+template <typename Fn>
+bool guarded(const char* where, const Fn& fn)
+{
+    try
+    {
+        fn();
+        return true;
+    }
+    catch (const std::exception& error)
+    {
+        log::warn("{} desligado depois de uma excecao: {}", where, error.what());
+    }
+    catch (...)
+    {
+        log::warn("{} desligado depois de uma excecao desconhecida", where);
+    }
+    return false;
+}
+
 // D3D11
 ID3D11Device* g_d3d11_device{nullptr};
 ID3D11DeviceContext* g_d3d11_context{nullptr};
@@ -95,9 +121,10 @@ LRESULT CALLBACK hooked_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
     }
     if (msg == WM_TIMER && wparam == kGameTickTimer)
     {
-        if (g_config.on_game_tick && !g_shutting_down.load(std::memory_order_acquire))
+        if (g_config.on_game_tick && !g_tick_failed
+            && !g_shutting_down.load(std::memory_order_acquire))
         {
-            g_config.on_game_tick();
+            g_tick_failed = !guarded("tick da game thread", g_config.on_game_tick);
         }
         return 0; // o timer é nosso; o jogo não deve vê-lo
     }
@@ -108,7 +135,8 @@ LRESULT CALLBACK hooked_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 
         // Enquanto o overlay está aberto o input é dele. Deixar passar faria
         // um clique num botão girar a câmera junto.
-        if (g_wants_input.load(std::memory_order_relaxed))
+        if (g_wants_input.load(std::memory_order_relaxed)
+            && !g_render_failed.load(std::memory_order_relaxed))
         {
             const auto& io = ImGui::GetIO();
             const bool mouse = io.WantCaptureMouse
@@ -265,21 +293,23 @@ BOOL CALLBACK match_game_window(HWND window, LPARAM out)
 // enganchada assim que existir, sem esperar o primeiro Present.
 DWORD WINAPI wait_for_game_window(LPVOID)
 {
-    constexpr int kAttempts = 600; // 600 x 250 ms: o jogo tem 2,5 min para abrir a janela
-    for (int i = 0; i < kAttempts && !g_shutting_down.load(); ++i)
-    {
-        HWND window{nullptr};
-        EnumWindows(match_game_window, reinterpret_cast<LPARAM>(&window));
-        if (window != nullptr)
+    static_cast<void>(guarded("espera pela janela do jogo", [] {
+        constexpr int kAttempts = 600; // 600 x 250 ms: o jogo tem 2,5 min para abrir a janela
+        for (int i = 0; i < kAttempts && !g_shutting_down.load(); ++i)
         {
-            const std::lock_guard lock{g_init_mutex};
-            subclass_window(window);
-            log::info("janela do jogo encontrada; tick da game thread ativo");
-            return 0;
+            HWND window{nullptr};
+            EnumWindows(match_game_window, reinterpret_cast<LPARAM>(&window));
+            if (window != nullptr)
+            {
+                const std::lock_guard lock{g_init_mutex};
+                subclass_window(window);
+                log::info("janela do jogo encontrada; tick da game thread ativo");
+                return;
+            }
+            Sleep(250);
         }
-        Sleep(250);
-    }
-    log::warn("janela do jogo nao apareceu; a troca de musica fica inativa");
+        log::warn("janela do jogo nao apareceu; a troca de musica fica inativa");
+    }));
     return 0;
 }
 
@@ -399,11 +429,11 @@ void render_d3d12(IDXGISwapChain* swapchain)
     g_d3d12_queue->ExecuteCommandLists(1, lists);
 }
 
-HRESULT STDMETHODCALLTYPE hooked_present(IDXGISwapChain* swapchain, UINT interval, UINT flags)
+void draw_frame(IDXGISwapChain* swapchain)
 {
     if (!g_initialized.load(std::memory_order_acquire) && !initialize(swapchain))
     {
-        return g_present_original(swapchain, interval, flags);
+        return;
     }
 
     if (g_is_d3d12)
@@ -431,7 +461,17 @@ HRESULT STDMETHODCALLTYPE hooked_present(IDXGISwapChain* swapchain, UINT interva
     {
         render_d3d11(swapchain);
     }
+}
 
+HRESULT STDMETHODCALLTYPE hooked_present(IDXGISwapChain* swapchain, UINT interval, UINT flags)
+{
+    if (!g_render_failed.load(std::memory_order_relaxed)
+        && !guarded("overlay", [swapchain] { draw_frame(swapchain); }))
+    {
+        // Sem overlay, o input volta inteiro para o jogo.
+        g_render_failed.store(true, std::memory_order_relaxed);
+        g_wants_input.store(false, std::memory_order_relaxed);
+    }
     return g_present_original(swapchain, interval, flags);
 }
 
