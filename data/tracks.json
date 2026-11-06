@@ -1,10 +1,451 @@
 {
-  "_note": "Faixas NATIVAS do jogo. Preenchido no PC a partir do dump. Faixa nativa preserva a dinamica de intensidade da trilha; e por isso que o M2 comeca so com elas.",
+  "_note": "Faixas de batalha NATIVAS do jogo (MetaSoundSource, sufixo _BT_). O id e o caminho do asset, como fica no soft pointer que o jogo carrega; comparado sem diferenciar maiusculas, como o Unreal compara FName. Fonte: music_data.lua do ClairObscurExpedition33-VersusMod (MIT, github.com/Sebastian0211-vs/ClairObscurExpedition33-VersusMod) e exports de inimigos do encounters_overhaul (github.com/giraldiego/encounters_overhaul).",
   "_schema": {
-    "id": "string, obrigatorio — id da faixa como o jogo a dispara",
-    "name": "string, opcional — nome legivel; ausente, usa o id",
-    "source": "string, opcional — de onde a faixa vem, para dar contexto na lista",
-    "dynamic": "bool, opcional (padrao true) — false marca loop simples, sem dinamica"
+    "id": "string, obrigatorio - caminho do asset: /Game/.../MUS_Track_X.MUS_Track_X",
+    "name": "string, opcional - nome legivel; ausente, usa o id",
+    "source": "string, opcional - de onde a faixa vem, para dar contexto na lista",
+    "dynamic": "bool, opcional (padrao true) - false marca loop simples, sem dinamica"
   },
-  "tracks": []
+  "tracks": [
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere/MUS_Track_Lumiere_BT_33Decembre.MUS_Track_Lumiere_BT_33Decembre",
+      "name": "33 Decembre",
+      "source": "Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_AgainstHeart.MUS_Track_Common_BT_AgainstHeart",
+      "name": "Against Heart",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Reacher/MUS_Track_Reacher_BT_Alicia.MUS_Track_Reacher_BT_Alicia",
+      "name": "Alicia",
+      "source": "Reacher"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Gestral_Village/MUS_Track_GestralVillage_BT_Arena.MUS_Track_GestralVillage_BT_Arena",
+      "name": "Arena",
+      "source": "Gestral Village"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Goblu/MUS_Track_Goblu_BT_Avasha.MUS_Track_Goblu_BT_Avasha",
+      "name": "Avasha",
+      "source": "Goblu"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Gestral_Village/MUS_Track_GestralVillage_BT_BattleTheme.MUS_Track_GestralVillage_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Gestral Village"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Orange_Forest/MUS_Track_OrangeForest_BT_BattleTheme.MUS_Track_OrangeForest_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Orange Forest"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Reacher/MUS_Track_Reacher_BT_BattleTheme.MUS_Track_Reacher_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Reacher"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_BattleTheme.MUS_Track_SeaCliff_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_BattleTheme.MUS_Track_SpringMeadows_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_BattleTheme.MUS_Track_Visages_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/YellowForest/MUS_Track_YellowForest_BT_BattleTheme.MUS_Track_YellowForest_BT_BattleTheme",
+      "name": "Battle Theme",
+      "source": "Yellow Forest"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Ancient_Sanctuary/MUS_Track_AncientSanctuary_BT_BonzaieClairing.MUS_Track_AncientSanctuary_BT_BonzaieClairing",
+      "name": "Bonzaie Clairing",
+      "source": "Ancient Sanctuary"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Goblu/MUS_Track_Goblu_BT_Boss.MUS_Track_Goblu_BT_Boss",
+      "name": "Boss",
+      "source": "Goblu"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_Boss.MUS_Track_SpringMeadows_BT_Boss",
+      "name": "Boss",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_Boss_Finisher.MUS_Track_SpringMeadows_BT_Boss_Finisher",
+      "name": "Boss Finisher",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Reacher/MUS_Track_Reacher_BT_BossTheme.MUS_Track_Reacher_BT_BossTheme",
+      "name": "Boss Theme",
+      "source": "Reacher"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sirene/MUS_Track_Sirene_BT_BossTheme.MUS_Track_Sirene_BT_BossTheme",
+      "name": "Boss Theme",
+      "source": "Sirene"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_BossTheme_Phase1.MUS_Track_Visages_BT_BossTheme_Phase1",
+      "name": "Boss Theme Phase 1",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_BossTheme_Phase2.MUS_Track_Visages_BT_BossTheme_Phase2",
+      "name": "Boss Theme Phase 2",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Goblu/MUS_Track_Goblu_BT_Bourgeon.MUS_Track_Goblu_BT_Bourgeon",
+      "name": "Bourgeon",
+      "source": "Goblu"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Clea_Workshop/MUS_Track_CleaWorkshop_BT_Clea.MUS_Track_CleaWorkshop_BT_Clea",
+      "name": "Clea",
+      "source": "Clea's Workshop"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Clea_Workshop/MUS_Track_CleaWorkshop_BT_Clea_Finisher.MUS_Track_CleaWorkshop_BT_Clea_Finisher",
+      "name": "Clea Finisher",
+      "source": "Clea's Workshop"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_Colere.MUS_Track_Visages_BT_Colere",
+      "name": "Colere",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_ColorsOfConflict.MUS_Track_Common_BT_ColorsOfConflict",
+      "name": "Colors Of Conflict",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/EsquieNest/MUS_Track_EsquieNest_BT_DancingDust.MUS_Track_EsquieNest_BT_DancingDust",
+      "name": "Dancing Dust",
+      "source": "Esquie's Nest"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_DividedSwords.MUS_Track_ForgottenBattlefield_BT_DividedSwords",
+      "name": "Divided Swords",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_Dualliste.MUS_Track_ForgottenBattlefield_BT_Dualliste",
+      "name": "Dualliste",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_Dualliste_Phase1.MUS_Track_ForgottenBattlefield_BT_Dualliste_Phase1",
+      "name": "Dualliste Phase 1",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_Dualliste_Phase2.MUS_Track_ForgottenBattlefield_BT_Dualliste_Phase2",
+      "name": "Dualliste Phase 2",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Gestral_Village/MUS_Track_GestralVillage_BT_FightForTheWin.MUS_Track_GestralVillage_BT_FightForTheWin",
+      "name": "Fight For The Win",
+      "source": "Gestral Village"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_FirstLancelier.MUS_Track_SpringMeadows_BT_FirstLancelier",
+      "name": "First Lancelier",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_GestralMerchant.MUS_Track_Common_BT_GestralMerchant",
+      "name": "Gestral Merchant",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_GestralMerchant_WithIntro.MUS_Track_Common_BT_GestralMerchant_WithIntro",
+      "name": "Gestral Merchant With Intro",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_GetUpForLumiere_IntroLess.MUS_Track_SpringMeadows_BT_GetUpForLumiere_IntroLess",
+      "name": "Get Up For Lumiere Intro Less",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Spring_Meadows/MUS_Track_SpringMeadows_BT_GetUpForLumiere_WithIntro.MUS_Track_SpringMeadows_BT_GetUpForLumiere_WithIntro",
+      "name": "Get Up For Lumiere With Intro",
+      "source": "Spring Meadows"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Gestral_Village/MUS_Track_GestralVillage_BT_Golgra.MUS_Track_GestralVillage_BT_Golgra",
+      "name": "Golgra",
+      "source": "Gestral Village"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_GustaveLegacy.MUS_Track_Common_BT_GustaveLegacy",
+      "name": "Gustave Legacy",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_InLumiereName.MUS_Track_Common_BT_InLumiereName",
+      "name": "In Lumiere Name",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_InLumiereName_Soft.MUS_Track_Common_BT_InLumiereName_Soft",
+      "name": "In Lumiere Name Soft",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_Joie.MUS_Track_Visages_BT_Joie",
+      "name": "Joie",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_Lampmaster_Finisher.MUS_Track_SeaCliff_BT_Lampmaster_Finisher",
+      "name": "Lampmaster Finisher",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_Lampmaster_Phase1.MUS_Track_SeaCliff_BT_Lampmaster_Phase1",
+      "name": "Lampmaster Phase 1",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_Lampmaster_Phase2.MUS_Track_SeaCliff_BT_Lampmaster_Phase2",
+      "name": "Lampmaster Phase 2",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_LastOperaBeforeTheEndOfTheWorld.MUS_Track_Common_BT_LastOperaBeforeTheEndOfTheWorld",
+      "name": "Last Opera Before The End Of The World",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/OldLumiere/MUS_Track_OldLumiere_BT_LoveOfAFather.MUS_Track_OldLumiere_BT_LoveOfAFather",
+      "name": "Love Of A Father",
+      "source": "Old Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/OldLumiere/MUS_Track_OldLumiere_BT_Lumine.MUS_Track_OldLumiere_BT_Lumine",
+      "name": "Lumine",
+      "source": "Old Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Ancient_Sanctuary/MUS_Track_AncientSanctuary_BT_Megabot33.MUS_Track_AncientSanctuary_BT_Megabot33",
+      "name": "Megabot 33",
+      "source": "Ancient Sanctuary"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_MirrorRenoir_Part1.MUS_Track_Monolith_BT_MirrorRenoir_Part1",
+      "name": "Mirror Renoir Part 1",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_MirrorRenoir_Part2.MUS_Track_Monolith_BT_MirrorRenoir_Part2",
+      "name": "Mirror Renoir Part 2",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/MonocoStation/MUS_Track_MonocoStation_BT_Monoco.MUS_Track_MonocoStation_BT_Monoco",
+      "name": "Monoco",
+      "source": "Monoco's Station"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_OfVirtuosityAndHeart.MUS_Track_Common_BT_OfVirtuosityAndHeart",
+      "name": "Of Virtuosity And Heart",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Reacher/MUS_Track_Reacher_BT_Orphelin.MUS_Track_Reacher_BT_Orphelin",
+      "name": "Orphelin",
+      "source": "Reacher"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/VersoDraft/MUS_Track_VersoDraft_BT_Osquio.MUS_Track_VersoDraft_BT_Osquio",
+      "name": "Osquio",
+      "source": "Verso's Drafts"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/VersoDraft/MUS_Track_VersoDraft_BT_Osquio_Ending.MUS_Track_VersoDraft_BT_Osquio_Ending",
+      "name": "Osquio Ending",
+      "source": "Verso's Drafts"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere_Act3/MUS_Track_LumiereAct3_BT_OurDraftCollides.MUS_Track_LumiereAct3_BT_OurDraftCollides",
+      "name": "Our Draft Collides",
+      "source": "Lumiere Act III"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_PaintedDeath.MUS_Track_Common_BT_PaintedDeath",
+      "name": "Painted Death",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_PaintedHatred.MUS_Track_Common_BT_PaintedHatred",
+      "name": "Painted Hatred",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_Paintress_Phase1.MUS_Track_Monolith_BT_Paintress_Phase1",
+      "name": "Paintress Phase 1",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_Paintress_Phase2.MUS_Track_Monolith_BT_Paintress_Phase2",
+      "name": "Paintress Phase 2",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_Paintress_Phase3.MUS_Track_Monolith_BT_Paintress_Phase3",
+      "name": "Paintress Phase 3",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Goblu/MUS_Track_Goblu_BT_RainFromTheGround.MUS_Track_Goblu_BT_RainFromTheGround",
+      "name": "Rain From The Ground",
+      "source": "Goblu"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/OldLumiere/MUS_Track_OldLumiere_BT_Renoir.MUS_Track_OldLumiere_BT_Renoir",
+      "name": "Renoir",
+      "source": "Old Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_Renoir.MUS_Track_SeaCliff_BT_Renoir",
+      "name": "Renoir",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sirene/MUS_Track_Sirene_BT_RougeIris.MUS_Track_Sirene_BT_RougeIris",
+      "name": "Rouge Iris",
+      "source": "Sirene"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sirene/MUS_Track_Sirene_BT_RougeIris_Instrumental.MUS_Track_Sirene_BT_RougeIris_Instrumental",
+      "name": "Rouge Iris Instrumental",
+      "source": "Sirene"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sirene/MUS_Track_Sirene_BT_SewingTheDress.MUS_Track_Sirene_BT_SewingTheDress",
+      "name": "Sewing The Dress",
+      "source": "Sirene"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sirene/MUS_Track_Sirene_BT_SewingTheDress_SireneDress.MUS_Track_Sirene_BT_SewingTheDress_SireneDress",
+      "name": "Sewing The Dress Sirene Dress",
+      "source": "Sirene"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_ShadowOfTheMonolith.MUS_Track_ForgottenBattlefield_BT_ShadowOfTheMonolith",
+      "name": "Shadow Of The Monolith",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/ForgottenBattlefield/MUS_Track_ForgottenBattlefield_BT_ShadowOfTheMonolith_FirstChalier.MUS_Track_ForgottenBattlefield_BT_ShadowOfTheMonolith_FirstChalier",
+      "name": "Shadow Of The Monolith First Chalier",
+      "source": "Forgotten Battlefield"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Simon/MUS_Track_Common_BT_SimonDivergentStars.MUS_Track_Common_BT_SimonDivergentStars",
+      "name": "Simon Divergent Stars",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere/MUS_Track_Lumiere_BT_Sophie.MUS_Track_Lumiere_BT_Sophie",
+      "name": "Sophie",
+      "source": "Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Monolith/MUS_Track_Monolith_BT_StartThePaintressFight.MUS_Track_Monolith_BT_StartThePaintressFight",
+      "name": "Start The Paintress Fight",
+      "source": "Monolith"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Ancient_Sanctuary/MUS_Track_AncientSanctuary_BT_Summer2022.MUS_Track_AncientSanctuary_BT_Summer2022",
+      "name": "Summer 2022",
+      "source": "Ancient Sanctuary"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Worldmap/MUS_Track_Worldmap_BT_TakingDownThePaintress.MUS_Track_Worldmap_BT_TakingDownThePaintress",
+      "name": "Taking Down The Paintress",
+      "source": "World Map"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Worldmap/MUS_Track_Worldmap_BT_TakingDownThePaintress_Instrumental.MUS_Track_Worldmap_BT_TakingDownThePaintress_Instrumental",
+      "name": "Taking Down The Paintress Instrumental",
+      "source": "World Map"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/VersoDraft/MUS_Track_VersoDraft_BT_TheEndInMe.MUS_Track_VersoDraft_BT_TheEndInMe",
+      "name": "The End In Me",
+      "source": "Verso's Drafts"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/VersoDraft/MUS_Track_VersoDraft_BT_TheEndInMe_WithVocals.MUS_Track_VersoDraft_BT_TheEndInMe_WithVocals",
+      "name": "The End In Me With Vocals",
+      "source": "Verso's Drafts"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/VersoDraft/MUS_Track_VersoDraft_BT_TimeToSwimSwim.MUS_Track_VersoDraft_BT_TimeToSwimSwim",
+      "name": "Time To Swim Swim",
+      "source": "Verso's Drafts"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Visages/MUS_Track_Visages_BT_Tristesse.MUS_Track_Visages_BT_Tristesse",
+      "name": "Tristesse",
+      "source": "Visages"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere/MUS_Track_Lumiere_BT_Tuto.MUS_Track_Lumiere_BT_Tuto",
+      "name": "Tuto",
+      "source": "Lumiere"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/MonocoStation/MUS_Track_MonocoStation_BT_TwirlingVoices.MUS_Track_MonocoStation_BT_TwirlingVoices",
+      "name": "Twirling Voices",
+      "source": "Monoco's Station"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere_Act3/MUS_Track_LumiereAct3_BT_UneVieAPeindre_Phase3.MUS_Track_LumiereAct3_BT_UneVieAPeindre_Phase3",
+      "name": "Une Vie A Peindre Phase 3",
+      "source": "Lumiere Act III"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere_Act3/MUS_Track_LumiereAct3_BT_UneVieAPeindre_Phases12.MUS_Track_LumiereAct3_BT_UneVieAPeindre_Phases12",
+      "name": "Une Vie A Peindre Phases 12",
+      "source": "Lumiere Act III"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Common/MUS_Track_Common_BT_UntilYourGone.MUS_Track_Common_BT_UntilYourGone",
+      "name": "Until Your Gone",
+      "source": "Common"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_WeLost.MUS_Track_SeaCliff_BT_WeLost",
+      "name": "We Lost",
+      "source": "Sea Cliff"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Simon/MUS_Track_Simon_BT_WeLost_Finisher.MUS_Track_Simon_BT_WeLost_Finisher",
+      "name": "We Lost Finisher",
+      "source": "Simon"
+    },
+    {
+      "id": "/Game/Audio/MetaSound/MUSIC/Tracks/Simon/MUS_Track_Simon_BT_WeLost_Phase2_3.MUS_Track_Simon_BT_WeLost_Phase2_3",
+      "name": "We Lost Phase 2 3",
+      "source": "Simon"
+    }
+  ]
 }
