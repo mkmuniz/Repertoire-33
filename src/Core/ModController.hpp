@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -54,6 +55,12 @@ public:
 
     bool preview(std::string_view track_id);
     void stop_preview();
+
+    // Faixa que o jogo deve tocar no encontro: o override que vale agora, ou
+    // nullopt para a original. Mesma decisão do Swapper, sem registrar
+    // histórico: o patcher pergunta por fonte a cada tick, antes da luta.
+    [[nodiscard]] std::optional<std::string> music_for(std::string_view encounter_id,
+                                                       std::string_view original_track) const;
 
     bool export_preset(const std::filesystem::path& path) const;
     bool import_preset(const std::filesystem::path& path, bool replace);

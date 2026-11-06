@@ -25,6 +25,12 @@ local core_files = {
     "src/Config/*.cpp",
     "src/Data/*.cpp",
     "src/Core/*.cpp",
+    "src/Unreal/Memory.cpp",     -- leitores do Unreal: so olham memoria, entao
+                                 -- os testes montam o layout do UE5 num buffer
+    "src/Unreal/Names.cpp",      -- e verificam sem o jogo
+    "src/Unreal/Objects.cpp",
+    "src/Unreal/Properties.cpp",
+    "src/Hooks/MusicPatcher.cpp", -- troca nos dados do jogo, testada sobre memoria sintetica
     "src/Hooks/CombatStart.cpp", -- compila nativo de proposito: simulate() e o
                                  -- caminho de teste sem o jogo
 }
@@ -38,6 +44,7 @@ local core_files = {
 
 target("tests")
     set_kind("binary")
+    set_rundir("$(projectdir)") -- um teste valida o catalogo distribuido em data/
     add_files("tests/*.cpp")
     add_files(core_files)
     add_includedirs("src")

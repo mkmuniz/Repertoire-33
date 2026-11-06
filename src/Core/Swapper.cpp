@@ -36,7 +36,7 @@ SwapDecision Swapper::decide(std::string_view encounter_id,
         return {.swap = false, .track_id = {}, .reason = SwapReason::NoOverride};
     }
 
-    if (*target == original_track_id)
+    if (same_track_id(*target, original_track_id))
     {
         // Disparar a mesma faixa reiniciaria a música do zero no meio da
         // transição; não fazer nada soa melhor e é o que o usuário espera.

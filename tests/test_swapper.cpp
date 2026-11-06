@@ -77,6 +77,19 @@ TEST_CASE("override para a propria faixa original nao reinicia a musica")
     CHECK(decision.reason == SwapReason::AlreadyTheTrack);
 }
 
+TEST_CASE("caminho de asset com outra caixa e a mesma faixa, como no Unreal")
+{
+    const test::TempDir dir;
+    const auto catalog = catalog_with_tracks(dir);
+    OverrideTable overrides;
+    overrides.set("Boss_Sirene", "TRACK_LUMIERE");
+
+    const Swapper swapper{overrides, catalog};
+    const auto decision = swapper.decide("Boss_Sirene", "Track_Lumiere");
+    CHECK_FALSE(decision.swap);
+    CHECK(decision.reason == SwapReason::AlreadyTheTrack);
+}
+
 TEST_CASE("faixa inexistente no catalogo mantem a original em vez de causar silencio")
 {
     const test::TempDir dir;

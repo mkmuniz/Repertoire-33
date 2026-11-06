@@ -19,9 +19,7 @@ void draw_diagnostics_panel(ModController& mod, OverlayState& state)
     ImGui::TextDisabled("| %zu troca(s) aplicada(s) nesta sessao",
                         mod.swapper().swaps_applied());
 
-    ImGui::TextUnformatted(mod.watcher().installed()
-                               ? "Hook de combate: instalado"
-                               : "Hook de combate: NAO instalado (M0 pendente)");
+    ImGui::TextWrapped("Integracao com o jogo: %s", mod.watcher().detail().c_str());
 
     ImGui::Separator();
     theme::heading("Combates recentes");

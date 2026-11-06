@@ -105,8 +105,8 @@ void draw_overlay(ModController& mod, OverlayState& state)
     if (!mod.watcher().installed())
     {
         ImGui::PushStyleColor(ImGuiCol_Text, theme::color::kBlood);
-        ImGui::TextUnformatted(
-            "Hook de combate nao instalado: nenhuma troca vai ocorrer em jogo.");
+        ImGui::TextWrapped("Integracao com o jogo inativa (%s): nenhuma troca vai ocorrer.",
+                           mod.watcher().detail().c_str());
         ImGui::PopStyleColor();
     }
 
