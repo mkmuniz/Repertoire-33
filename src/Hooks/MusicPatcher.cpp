@@ -225,7 +225,6 @@ MusicPatcher::ClassInfo MusicPatcher::describe(std::uintptr_t klass, FName name)
         info.music = need(expect(m_properties.find_path(klass, {"BattleMusicParameters", "Music"}),
                                  "SoftObjectProperty", kSoftSize, "BattleMusicParameters.Music"));
         const auto selected = m_properties.find(klass, "SelectedEncounter");
-        info.handle_size = selected ? selected->size : 0;
         info.selected_row =
             need(expect(m_properties.find_path(klass, {"SelectedEncounter", "RowName"}),
                         "NameProperty", sizeof(FName), "SelectedEncounter.RowName"));

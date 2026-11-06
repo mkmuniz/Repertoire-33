@@ -107,7 +107,6 @@ private:
         std::int32_t encounter_row{-1};  // RowName do encontro (ação, manager)
         std::int32_t selected_row{-1};   // inimigo: SelectedEncounter.RowName
         std::int32_t possible{-1};       // inimigo: TArray<FDataTableRowHandle>
-        std::int32_t handle_size{0};     // tamanho de um FDataTableRowHandle
         std::int32_t row_in_handle{0};   // offset de RowName dentro dele
         std::int32_t encounter_name{-1}; // manager: EncounterName, None fora de luta
         std::int32_t loaded_music{-1};   // manager: LoadedBattleMusic
