@@ -1,5 +1,7 @@
 #include <doctest/doctest.h>
 
+#include <array>
+
 #include "FakeUnreal.hpp"
 #include "Unreal/Names.hpp"
 
@@ -72,6 +74,65 @@ TEST_CASE("find_entry acha o indice pelo texto, sem criar nome")
     CHECK(pool->find_entry("None") == 0u);
     CHECK_FALSE(pool->find_entry("MUS_Boss_Sim").has_value());
     CHECK_FALSE(pool->find_entry("Inexistente").has_value());
+}
+
+TEST_CASE("find_entry ignora maiusculas, como o Unreal compara FName")
+{
+    test::FakeNamePool fake;
+    const auto package = fake.add("/Game/Audio/MetaSound/Music/Tracks/Goblu/MUS_Track_Goblu_BT_Boss");
+    const auto pool = NamePool::at(fake.address());
+    REQUIRE(pool.has_value());
+    CHECK(pool->find_entry("/Game/Audio/MetaSound/MUSIC/Tracks/Goblu/MUS_Track_Goblu_BT_Boss")
+          == package);
+}
+
+TEST_CASE("find_entries resolve varios textos numa varredura so")
+{
+    test::FakeNamePool fake;
+    const auto a = fake.add("MUS_Track_A");
+    const auto b = fake.add("MUS_Track_Bb");
+    const auto pool = NamePool::at(fake.address());
+    REQUIRE(pool.has_value());
+
+    const std::array<std::string_view, 4> texts{"mus_track_bb", "Inexistente", "MUS_TRACK_A", ""};
+    const auto found = pool->find_entries(texts);
+    REQUIRE(found.size() == 4);
+    CHECK(found[0] == b);
+    CHECK_FALSE(found[1].has_value());
+    CHECK(found[2] == a);
+    CHECK_FALSE(found[3].has_value());
+}
+
+TEST_CASE("split_name_number segue o ParseNumber do UE5")
+{
+    using unreal::split_name_number;
+    const auto phase = split_name_number("MUS_Track_Simon_BT_WeLost_Phase2_3");
+    CHECK(phase.base == "MUS_Track_Simon_BT_WeLost_Phase2");
+    CHECK(phase.number == 4);
+
+    CHECK(split_name_number("Rocket_0").number == 1);
+    CHECK(split_name_number("Rocket_0").base == "Rocket");
+    CHECK(split_name_number("Rocket_04").number == 0);     // zero a esquerda nao divide
+    CHECK(split_name_number("Rocket_04").base == "Rocket_04");
+    CHECK(split_name_number("Phase2").number == 0);        // sem '_' antes dos digitos
+    CHECK(split_name_number("_5").base == "");
+    CHECK(split_name_number("123").number == 0);           // so digitos
+    CHECK(split_name_number("A_99999999999").number == 0); // nao cabe em int32
+    CHECK(split_name_number("").number == 0);
+}
+
+TEST_CASE("find_name monta o FName que o Unreal guardaria para o texto")
+{
+    test::FakeNamePool fake;
+    const auto base = fake.add("MUS_Track_Simon_BT_WeLost_Phase2");
+    const auto pool = NamePool::at(fake.address());
+    REQUIRE(pool.has_value());
+
+    const auto name = pool->find_name("MUS_Track_Simon_BT_WeLost_Phase2_3");
+    REQUIRE(name.has_value());
+    CHECK(*name == FName{base, 4});
+    CHECK(pool->to_string(*name) == "MUS_Track_Simon_BT_WeLost_Phase2_3");
+    CHECK_FALSE(pool->find_name("MUS_Track_Inexistente").has_value());
 }
 
 TEST_CASE("find_entry para no cursor do bloco atual")

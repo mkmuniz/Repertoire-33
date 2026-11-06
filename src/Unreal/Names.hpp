@@ -2,7 +2,10 @@
 
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "Unreal/Memory.hpp"
 
@@ -14,7 +17,20 @@ struct FName
 {
     std::uint32_t comparison_index{0};
     std::uint32_t number{0};
+
+    friend bool operator==(const FName&, const FName&) = default;
 };
+
+// Texto -> (base, número), com a regra do ParseNumber do UE5: um sufixo
+// "_<dígitos>" vira número (somado de 1) se não tiver zero à esquerda e couber
+// em int32. "MUS_Track_Simon_BT_WeLost_Phase2_3" é guardado como base
+// "MUS_Track_Simon_BT_WeLost_Phase2" e número 4; "Rocket_04" não se divide.
+struct SplitName
+{
+    std::string_view base{};
+    std::uint32_t number{0};
+};
+[[nodiscard]] SplitName split_name_number(std::string_view text);
 
 // Leitor do FNamePool do UE5, o dono de todas as strings de nome.
 //
@@ -47,12 +63,19 @@ public:
     // Unreal guarda o sufixo somado de 1).
     [[nodiscard]] std::string to_string(FName name) const;
 
-    // Busca reversa: o índice da entrada cujo texto é exatamente `text`, sem
-    // criar nome novo — o mod nunca chama o construtor de FName do engine. Em
-    // jogo cozinhado o asset registry já registrou o caminho de todo asset, então
-    // as faixas do jogo estão aqui. Varre o pool inteiro: chame raramente e
-    // guarde o resultado.
+    // Busca reversa: o índice da entrada cujo texto é `text`, sem criar nome
+    // novo — o mod nunca chama o construtor de FName do engine. Sem diferenciar
+    // maiúsculas, como o Unreal compara FName. Em jogo cozinhado o asset
+    // registry já registrou o caminho de todo asset, então as faixas estão aqui.
+    // Varre o pool inteiro: chame raramente e guarde o resultado.
     [[nodiscard]] std::optional<std::uint32_t> find_entry(std::string_view text) const;
+
+    // A mesma busca para vários textos numa única varredura do pool.
+    [[nodiscard]] std::vector<std::optional<std::uint32_t>>
+    find_entries(std::span<const std::string_view> texts) const;
+
+    // Texto completo -> FName: separa o sufixo numérico e acha a base.
+    [[nodiscard]] std::optional<FName> find_name(std::string_view text) const;
 
     [[nodiscard]] std::uintptr_t address() const { return m_pool; }
 

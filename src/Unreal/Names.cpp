@@ -1,5 +1,6 @@
 #include "Unreal/Names.hpp"
 
+#include <algorithm>
 #include <array>
 #include <format>
 #include <string_view>
@@ -135,15 +136,74 @@ std::optional<std::string> NamePool::entry(std::uint32_t comparison_index) const
     return read_entry(m_pool + kBlocksOffset, comparison_index);
 }
 
+SplitName split_name_number(std::string_view text)
+{
+    std::size_t digits = 0;
+    while (digits < text.size() && text[text.size() - 1 - digits] >= '0'
+           && text[text.size() - 1 - digits] <= '9')
+    {
+        ++digits;
+    }
+
+    constexpr std::size_t kMaxDigits = 10;
+    const auto first_digit = text.size() - digits;
+    if (digits == 0 || digits >= text.size() || digits > kMaxDigits
+        || text[first_digit - 1] != '_' || (digits > 1 && text[first_digit] == '0'))
+    {
+        return {text, 0};
+    }
+
+    std::uint64_t value = 0;
+    for (std::size_t i = first_digit; i < text.size(); ++i)
+    {
+        value = value * 10 + static_cast<std::uint64_t>(text[i] - '0');
+    }
+    if (value >= 0x7FFFFFFF)
+    {
+        return {text, 0};
+    }
+    return {text.substr(0, first_digit - 1), static_cast<std::uint32_t>(value + 1)};
+}
+
 std::optional<std::uint32_t> NamePool::find_entry(std::string_view text) const
 {
+    return find_entries(std::span{&text, 1}).front();
+}
+
+std::vector<std::optional<std::uint32_t>>
+NamePool::find_entries(std::span<const std::string_view> texts) const
+{
+    std::vector<std::optional<std::uint32_t>> found(texts.size());
+    const auto lower = [](char c) {
+        return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c;
+    };
+
+    // Baldes por tamanho: uma entrada do pool só é lida se algum texto pedido
+    // tem o mesmo tamanho, e aí só é comparada com esses.
+    std::vector<std::string> wanted(texts.size());
+    std::vector<std::vector<std::size_t>> by_length(kMaxLength);
+    std::size_t remaining = 0;
+    for (std::size_t i = 0; i < texts.size(); ++i)
+    {
+        if (texts[i].empty() || texts[i].size() >= kMaxLength)
+        {
+            continue;
+        }
+        wanted[i].resize(texts[i].size());
+        std::ranges::transform(texts[i], wanted[i].begin(), lower);
+        by_length[texts[i].size()].push_back(i);
+        ++remaining;
+    }
+    std::array<char, kMaxLength> chars{};
+
     // Blocos são preenchidos em ordem; ao abrir um bloco novo o Unreal grava um
     // cabeçalho de tamanho 0 no fim do anterior, que é onde a varredura para.
     constexpr std::size_t kBlockBytes = 0x10000 * kStride;
     const auto current_block = read<std::uint32_t>(m_pool + 0x08).value_or(0);
     const auto current_cursor = read<std::uint32_t>(m_pool + 0x0C).value_or(0);
 
-    for (std::uint32_t block = 0; block <= current_block && block < kMaxBlocks; ++block)
+    for (std::uint32_t block = 0; block <= current_block && block < kMaxBlocks && remaining > 0;
+         ++block)
     {
         const auto base = read<std::uintptr_t>(m_pool + kBlocksOffset + block * sizeof(std::uintptr_t));
         if (!base || *base == 0)
@@ -152,7 +212,7 @@ std::optional<std::uint32_t> NamePool::find_entry(std::string_view text) const
         }
         const std::size_t limit = block == current_block ? current_cursor : kBlockBytes;
         std::size_t offset = 0;
-        while (offset + sizeof(std::uint16_t) <= limit)
+        while (offset + sizeof(std::uint16_t) <= limit && remaining > 0)
         {
             const auto header = read<std::uint16_t>(*base + offset);
             if (!header)
@@ -166,21 +226,38 @@ std::optional<std::uint32_t> NamePool::find_entry(std::string_view text) const
                 break;
             }
             const auto index = (block << 16) | static_cast<std::uint32_t>(offset / kStride);
-            // Comparação só de quem tem o mesmo tamanho: barata e quase sempre
-            // descarta sem ler os caracteres.
-            if (!wide && length == text.size())
+
+            // Só nomes narrow: caminhos de asset são ASCII.
+            if (!wide && !by_length[length].empty()
+                && copy_memory(chars.data(), *base + offset + sizeof(std::uint16_t), length))
             {
-                if (const auto entry_text = read_entry(m_pool + kBlocksOffset, index);
-                    entry_text && *entry_text == text)
+                std::ranges::transform(chars.begin(), chars.begin() + length, chars.begin(), lower);
+                const std::string_view text{chars.data(), length};
+                for (const auto i : by_length[length])
                 {
-                    return index;
+                    if (!found[i] && text == wanted[i])
+                    {
+                        found[i] = index;
+                        --remaining;
+                    }
                 }
             }
             offset += sizeof(std::uint16_t) + static_cast<std::size_t>(length) * (wide ? 2 : 1);
             offset += offset % kStride;
         }
     }
-    return std::nullopt;
+    return found;
+}
+
+std::optional<FName> NamePool::find_name(std::string_view text) const
+{
+    const auto split = split_name_number(text);
+    const auto index = find_entry(split.base);
+    if (!index)
+    {
+        return std::nullopt;
+    }
+    return FName{*index, split.number};
 }
 
 std::string NamePool::to_string(FName name) const
