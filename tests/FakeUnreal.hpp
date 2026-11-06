@@ -15,7 +15,9 @@
 
 namespace e33::test
 {
-// Um FNamePool com um bloco só. `add` devolve o índice que o Unreal daria.
+// Um FNamePool com um bloco só. `add` devolve o índice que o Unreal daria —
+// inclusive o mesmo índice para o mesmo texto, sem diferenciar caixa: o pool
+// do engine guarda uma entrada por nome.
 class FakeNamePool
 {
 public:
@@ -31,7 +33,21 @@ public:
 
     std::uint32_t add(std::string_view name)
     {
+        std::string key{name};
+        for (auto& c : key)
+        {
+            c = (c >= 'A' && c <= 'Z') ? static_cast<char>(c - 'A' + 'a') : c;
+        }
+        for (const auto& [existing, existing_index] : m_narrow)
+        {
+            if (existing == key)
+            {
+                return existing_index;
+            }
+        }
+
         const auto index = static_cast<std::uint32_t>(m_cursor / unreal::NamePool::kStride);
+        m_narrow.emplace_back(std::move(key), index);
         const auto header = static_cast<std::uint16_t>(name.size() << 6);
         std::memcpy(m_block.get() + m_cursor, &header, sizeof(header));
         std::memcpy(m_block.get() + m_cursor + 2, name.data(), name.size());
@@ -70,6 +86,7 @@ private:
     std::vector<std::uint8_t> m_pool;
     std::unique_ptr<std::uint8_t[]> m_block;
     std::size_t m_cursor{0};
+    std::vector<std::pair<std::string, std::uint32_t>> m_narrow{};
 };
 
 // Um UObject: o cabeçalho de UObjectBase, mais espaço para os campos de

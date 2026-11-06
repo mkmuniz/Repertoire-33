@@ -190,13 +190,19 @@ std::uintptr_t Objects::find(std::string_view full) const
     {
         return 0;
     }
-    const auto short_name = full.substr(cut + 1);
+    // Resolvido uma vez para FName, o nome curto é comparado por índice: decodificar o
+    // nome de cada um das centenas de milhares de objetos travaria a game thread.
+    const auto short_name = m_names.find_name(full.substr(cut + 1));
+    if (!short_name)
+    {
+        return 0; // nenhum objeto pode ter um nome que não existe no pool
+    }
 
     const auto total = m_array.count();
     for (std::int32_t i = 0; i < total; ++i)
     {
         const auto object = m_array.object(i);
-        if (object == 0 || name(object) != short_name)
+        if (object == 0 || read<FName>(object + object_layout::kName) != short_name)
         {
             continue;
         }
