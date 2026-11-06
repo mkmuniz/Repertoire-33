@@ -107,5 +107,12 @@ O que mais ajuda é o trecho do log entre `combate iniciado` e
 | `troca tardia na batalha em curso` e mesmo assim a original carregada | a música é pré-carregada antes do início detectável; idem |
 | `faixa ... nao existe no jogo` | o caminho no catálogo está errado para esta versão do jogo |
 
+### Se o jogo engasgar
+
+Com o log verboso ligado, a cada minuto aparece
+`tick da game thread: media X us, pico Y us`. É o custo do mod dentro do
+quadro do jogo; acima de ~2000 us de pico vale reduzir `kSliceSize` em
+`src/Hooks/MusicPatcher.hpp`.
+
 Ambiente que economiza horas: save com todos os bosses liberados, modo janela
 sem borda, e o log verboso ligado.
