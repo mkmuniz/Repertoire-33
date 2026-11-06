@@ -37,6 +37,7 @@ public:
         std::memcpy(m_block.get() + m_cursor + 2, name.data(), name.size());
         m_cursor += 2 + name.size();
         m_cursor += m_cursor % unreal::NamePool::kStride;
+        sync_cursor();
         return index;
     }
 
@@ -47,6 +48,7 @@ public:
         std::memcpy(m_block.get() + m_cursor, &header, sizeof(header));
         std::memcpy(m_block.get() + m_cursor + 2, name.data(), name.size() * 2);
         m_cursor += 2 + name.size() * 2;
+        sync_cursor();
         return index;
     }
 
@@ -56,6 +58,13 @@ public:
     }
 
 private:
+    // CurrentByteCursor (+0x0C): até onde o bloco atual está preenchido.
+    void sync_cursor()
+    {
+        const auto cursor = static_cast<std::uint32_t>(m_cursor);
+        std::memcpy(m_pool.data() + 0x0C, &cursor, sizeof(cursor));
+    }
+
     static constexpr std::size_t kBlockSize = 64 * 1024;
 
     std::vector<std::uint8_t> m_pool;

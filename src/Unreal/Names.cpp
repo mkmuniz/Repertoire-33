@@ -135,6 +135,54 @@ std::optional<std::string> NamePool::entry(std::uint32_t comparison_index) const
     return read_entry(m_pool + kBlocksOffset, comparison_index);
 }
 
+std::optional<std::uint32_t> NamePool::find_entry(std::string_view text) const
+{
+    // Blocos são preenchidos em ordem; ao abrir um bloco novo o Unreal grava um
+    // cabeçalho de tamanho 0 no fim do anterior, que é onde a varredura para.
+    constexpr std::size_t kBlockBytes = 0x10000 * kStride;
+    const auto current_block = read<std::uint32_t>(m_pool + 0x08).value_or(0);
+    const auto current_cursor = read<std::uint32_t>(m_pool + 0x0C).value_or(0);
+
+    for (std::uint32_t block = 0; block <= current_block && block < kMaxBlocks; ++block)
+    {
+        const auto base = read<std::uintptr_t>(m_pool + kBlocksOffset + block * sizeof(std::uintptr_t));
+        if (!base || *base == 0)
+        {
+            break;
+        }
+        const std::size_t limit = block == current_block ? current_cursor : kBlockBytes;
+        std::size_t offset = 0;
+        while (offset + sizeof(std::uint16_t) <= limit)
+        {
+            const auto header = read<std::uint16_t>(*base + offset);
+            if (!header)
+            {
+                break;
+            }
+            const bool wide = (*header & kWideBit) != 0;
+            const std::uint16_t length = *header >> kLengthShift;
+            if (length == 0)
+            {
+                break;
+            }
+            const auto index = (block << 16) | static_cast<std::uint32_t>(offset / kStride);
+            // Comparação só de quem tem o mesmo tamanho: barata e quase sempre
+            // descarta sem ler os caracteres.
+            if (!wide && length == text.size())
+            {
+                if (const auto entry_text = read_entry(m_pool + kBlocksOffset, index);
+                    entry_text && *entry_text == text)
+                {
+                    return index;
+                }
+            }
+            offset += sizeof(std::uint16_t) + static_cast<std::size_t>(length) * (wide ? 2 : 1);
+            offset += offset % kStride;
+        }
+    }
+    return std::nullopt;
+}
+
 std::string NamePool::to_string(FName name) const
 {
     auto base = entry(name.comparison_index);

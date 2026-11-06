@@ -47,6 +47,13 @@ public:
     // Unreal guarda o sufixo somado de 1).
     [[nodiscard]] std::string to_string(FName name) const;
 
+    // Busca reversa: o índice da entrada cujo texto é exatamente `text`, sem
+    // criar nome novo — o mod nunca chama o construtor de FName do engine. Em
+    // jogo cozinhado o asset registry já registrou o caminho de todo asset, então
+    // as faixas do jogo estão aqui. Varre o pool inteiro: chame raramente e
+    // guarde o resultado.
+    [[nodiscard]] std::optional<std::uint32_t> find_entry(std::string_view text) const;
+
     [[nodiscard]] std::uintptr_t address() const { return m_pool; }
 
 private:

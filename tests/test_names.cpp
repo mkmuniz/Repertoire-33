@@ -57,6 +57,33 @@ TEST_CASE("to_string aplica o sufixo de instancia como o Unreal: number - 1")
     CHECK(pool->to_string(FName{index, 3}) == "AkComponent_2");
 }
 
+TEST_CASE("find_entry acha o indice pelo texto, sem criar nome")
+{
+    test::FakeNamePool fake;
+    fake.add("MUS_Battle_A");
+    const auto package = fake.add("/Game/Audio/Music/MUS_Boss_Simon");
+    const auto asset = fake.add("MUS_Boss_Simon");
+    fake.add_wide(u"MUS_Boss_Simon"); // wide com o mesmo texto nao e o mesmo nome
+
+    const auto pool = NamePool::at(fake.address());
+    REQUIRE(pool.has_value());
+    CHECK(pool->find_entry("/Game/Audio/Music/MUS_Boss_Simon") == package);
+    CHECK(pool->find_entry("MUS_Boss_Simon") == asset);
+    CHECK(pool->find_entry("None") == 0u);
+    CHECK_FALSE(pool->find_entry("MUS_Boss_Sim").has_value());
+    CHECK_FALSE(pool->find_entry("Inexistente").has_value());
+}
+
+TEST_CASE("find_entry para no cursor do bloco atual")
+{
+    test::FakeNamePool fake;
+    const auto pool = NamePool::at(fake.address());
+    REQUIRE(pool.has_value());
+    // Nada alem de None/ByteProperty: o resto do bloco nao e lido.
+    CHECK_FALSE(pool->find_entry("").has_value());
+    CHECK(pool->find_entry("ByteProperty") == 3u);
+}
+
 TEST_CASE("indice fora do pool nao le memoria alheia")
 {
     const test::FakeNamePool fake;
