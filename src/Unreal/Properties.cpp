@@ -1,6 +1,5 @@
 #include "Unreal/Properties.hpp"
 
-#include <cctype>
 #include <format>
 
 namespace e33::unreal
@@ -11,16 +10,27 @@ constexpr std::size_t kGuidLength = 32;
 constexpr int kChainLimit = 64;     // superclasses
 constexpr int kPropertyLimit = 4096; // campos por struct
 
-bool all_of(std::string_view text, int (*predicate)(int))
+template <typename Predicate>
+bool all_of(std::string_view text, Predicate predicate)
 {
     for (const char c : text)
     {
-        if (predicate(static_cast<unsigned char>(c)) == 0)
+        if (!predicate(static_cast<unsigned char>(c)))
         {
             return false;
         }
     }
     return !text.empty();
+}
+
+bool is_digit(unsigned char c)
+{
+    return c >= '0' && c <= '9';
+}
+
+bool is_hex(unsigned char c)
+{
+    return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 } // namespace
 
@@ -44,8 +54,7 @@ bool matches_member_name(std::string_view actual, std::string_view wanted)
     }
     const auto number = rest.substr(0, underscore);
     const auto guid = rest.substr(underscore + 1);
-    return all_of(number, std::isdigit) && guid.size() == kGuidLength
-           && all_of(guid, std::isxdigit);
+    return all_of(number, is_digit) && guid.size() == kGuidLength && all_of(guid, is_hex);
 }
 
 std::optional<Property> Properties::find(std::uintptr_t ustruct, std::string_view name) const

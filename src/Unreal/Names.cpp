@@ -106,13 +106,15 @@ std::optional<NamePool> NamePool::find(const Image& image)
     for (auto cursor = start; cursor + kBlocksOffset + sizeof(std::uintptr_t) <= end;
          cursor += sizeof(std::uintptr_t))
     {
-        // Filtro barato antes de seguir ponteiro: CurrentBlock é pequeno.
-        const auto current_block = *reinterpret_cast<const std::uint32_t*>(cursor + 0x8);
-        if (current_block >= kMaxBlocks)
+        // Filtro barato antes de seguir ponteiro: CurrentBlock é pequeno. Lido
+        // pelo caminho protegido: nem toda página da .data é garantidamente
+        // legível num executável com protetor.
+        const auto current_block = read<std::uint32_t>(cursor + 0x8);
+        if (!current_block || *current_block >= kMaxBlocks)
         {
             continue;
         }
-        const auto block0 = *reinterpret_cast<const std::uintptr_t*>(cursor + kBlocksOffset);
+        const auto block0 = read<std::uintptr_t>(cursor + kBlocksOffset).value_or(0);
         if (block0 == 0 || image.contains(block0))
         {
             continue; // os blocos são alocados no heap, nunca dentro do módulo

@@ -92,14 +92,15 @@ std::optional<ObjectArray> ObjectArray::find(const Image& image)
     const auto end = image.data.start + image.data.size;
     for (auto cursor = image.data.start; cursor + kNumChunks + 4 <= end; cursor += 8)
     {
-        // Filtros baratos, só com leituras dentro da própria .data.
-        const auto chunks = *reinterpret_cast<const std::uintptr_t*>(cursor + kObjects);
+        // Filtros baratos, só com leituras dentro da própria .data — mesmo
+        // assim protegidas: nem toda página dela é garantidamente legível.
+        const auto chunks = read<std::uintptr_t>(cursor + kObjects).value_or(0);
         if (chunks == 0 || image.contains(chunks))
         {
             continue;
         }
-        const auto num = *reinterpret_cast<const std::int32_t*>(cursor + kNumElements);
-        const auto num_chunks = *reinterpret_cast<const std::int32_t*>(cursor + kNumChunks);
+        const auto num = read<std::int32_t>(cursor + kNumElements).value_or(0);
+        const auto num_chunks = read<std::int32_t>(cursor + kNumChunks).value_or(-1);
         if (num <= 0 || num_chunks != chunks_for(num))
         {
             continue;

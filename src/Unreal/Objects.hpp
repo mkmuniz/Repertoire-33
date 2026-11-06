@@ -78,7 +78,8 @@ public:
     [[nodiscard]] std::string name(std::uintptr_t object) const;
     [[nodiscard]] std::string class_name(std::uintptr_t object) const;
 
-    // "Pacote.Outer.Nome" — /Script/AkAudio.AkGameplayStatics.PostEvent.
+    // "Pacote.Outer.Nome": /Game/Audio/.../MUS_Track_X.MUS_Track_X, ou
+    // /Script/Engine.Actor.ReceiveTick. Ponto em todo nível, como o Dumper-7.
     [[nodiscard]] std::string path(std::uintptr_t object) const;
 
     // "Classe Caminho", o formato de UObject::GetFullName e do Dumper-7.
