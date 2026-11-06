@@ -67,4 +67,9 @@ private:
 
 // true se todos os termos de `query` aparecem em `haystack` (em qualquer ordem).
 [[nodiscard]] bool matches_query(std::string_view haystack, std::string_view query);
+
+// Id de faixa é caminho de asset, e o Unreal compara FName sem diferenciar
+// maiúsculas: o índice do pak diz ".../MUSIC/..." e o objeto carregado diz
+// ".../Music/...", e os dois são a mesma faixa.
+[[nodiscard]] bool same_track_id(std::string_view a, std::string_view b);
 } // namespace e33

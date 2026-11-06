@@ -120,6 +120,49 @@ TEST_CASE("faixa sem dynamic explicito conta como nativa")
     CHECK_FALSE(external.front()->dynamic);
 }
 
+TEST_CASE("id de faixa e comparado sem caixa: MUSIC e Music sao o mesmo asset")
+{
+    CHECK(same_track_id("/Game/Audio/MUSIC/A.A", "/game/audio/Music/a.a"));
+    CHECK_FALSE(same_track_id("/Game/A.A", "/Game/A.B"));
+    CHECK_FALSE(same_track_id("/Game/A", "/Game/A.A"));
+
+    const test::TempDir dir;
+    const auto catalog = make_catalog(dir);
+    CHECK(catalog.knows_track("TRACK_LUMIERE"));
+    CHECK(catalog.track_name("track_lumiere") == "Lumière");
+}
+
+TEST_CASE("o catalogo distribuido em data/ carrega inteiro e sem id repetido")
+{
+    // Roda a partir da raiz do projeto (rundir do target tests).
+    Catalog catalog;
+    REQUIRE(catalog.load_bosses("data/bosses.json"));
+    REQUIRE(catalog.load_tracks("data/tracks.json"));
+    CHECK(catalog.bosses().size() > 100);
+    CHECK(catalog.tracks().size() > 80);
+
+    for (std::size_t i = 0; i < catalog.bosses().size(); ++i)
+    {
+        for (std::size_t j = i + 1; j < catalog.bosses().size(); ++j)
+        {
+            CHECK_MESSAGE(catalog.bosses()[i].id != catalog.bosses()[j].id,
+                          catalog.bosses()[i].id);
+        }
+    }
+    for (std::size_t i = 0; i < catalog.tracks().size(); ++i)
+    {
+        const auto& id = catalog.tracks()[i].id;
+        // Caminho completo de objeto: pacote + "." + asset, que é o que o
+        // soft pointer do jogo guarda.
+        CHECK_MESSAGE(id.starts_with("/Game/"), id);
+        CHECK_MESSAGE(id.find('.') != std::string::npos, id);
+        for (std::size_t j = i + 1; j < catalog.tracks().size(); ++j)
+        {
+            CHECK_MESSAGE(!same_track_id(id, catalog.tracks()[j].id), id);
+        }
+    }
+}
+
 TEST_CASE("arquivo ausente nao e fatal: o mod segue com ids cruos")
 {
     const test::TempDir dir;

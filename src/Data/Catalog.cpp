@@ -234,7 +234,8 @@ std::string_view Catalog::boss_name(std::string_view id) const
 
 std::string_view Catalog::track_name(std::string_view id) const
 {
-    const auto it = std::ranges::find_if(m_tracks, [id](const TrackEntry& e) { return e.id == id; });
+    const auto it = std::ranges::find_if(m_tracks,
+                                         [id](const TrackEntry& e) { return same_track_id(e.id, id); });
     return it == m_tracks.end() ? id : std::string_view{it->name};
 }
 
@@ -245,7 +246,27 @@ bool Catalog::knows_boss(std::string_view id) const
 
 bool Catalog::knows_track(std::string_view id) const
 {
-    return std::ranges::any_of(m_tracks, [id](const TrackEntry& e) { return e.id == id; });
+    return std::ranges::any_of(m_tracks,
+                               [id](const TrackEntry& e) { return same_track_id(e.id, id); });
+}
+
+bool same_track_id(std::string_view a, std::string_view b)
+{
+    if (a.size() != b.size())
+    {
+        return false;
+    }
+    for (std::size_t i = 0; i < a.size(); ++i)
+    {
+        const auto lower = [](char c) {
+            return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c;
+        };
+        if (lower(a[i]) != lower(b[i]))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Catalog::note_seen_encounter(std::string_view id)

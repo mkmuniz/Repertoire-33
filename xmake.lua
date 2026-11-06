@@ -43,6 +43,7 @@ local core_files = {
 
 target("tests")
     set_kind("binary")
+    set_rundir("$(projectdir)") -- um teste valida o catalogo distribuido em data/
     add_files("tests/*.cpp")
     add_files(core_files)
     add_includedirs("src")
