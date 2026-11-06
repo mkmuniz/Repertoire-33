@@ -87,7 +87,10 @@ public:
     // Caminho do USoundBase que o battle manager carregou por último.
     [[nodiscard]] const std::string& last_loaded_track() const { return m_last_loaded; }
 
-    static constexpr std::size_t kSliceSize = 32 * 1024;
+    // ~1,5 ms por tick na game thread; a tabela inteira (~500 mil objetos)
+    // passa em ~3 s, folgado: inimigos e ações carregam com o nível, bem antes
+    // da luta, e a troca tardia cobre o resto.
+    static constexpr std::size_t kSliceSize = 16 * 1024;
 
 private:
     enum class Kind : std::uint8_t

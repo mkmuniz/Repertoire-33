@@ -1,5 +1,7 @@
 #include "ModHost.hpp"
 
+#include <algorithm>
+#include <chrono>
 #include <format>
 #include <string>
 #include <vector>
@@ -23,6 +25,7 @@ constexpr double kAttachRetrySeconds = 2.0;
 // Layout que não confere várias vezes seguidas é patch do jogo, não pressa.
 constexpr int kLayoutFailureLimit = 5;
 constexpr unsigned kStatusEveryTicks = 10;
+constexpr unsigned kTimingEveryTicks = 600; // um minuto a 10 ticks/s
 
 double now_seconds()
 {
@@ -165,10 +168,26 @@ void ModHost::on_game_tick()
         return;
     }
 
+    // O tick divide o quadro com o jogo: o custo fica medido, para que
+    // "o jogo engasga" tenha um número no log verboso.
+    const auto started = std::chrono::steady_clock::now();
     m_patcher->tick();
+    const long long spent = std::chrono::duration_cast<std::chrono::microseconds>(
+                           std::chrono::steady_clock::now() - started)
+                           .count();
+    m_tick_us_total += spent;
+    m_tick_us_peak = std::max(m_tick_us_peak, spent);
+
     if (++m_ticks % kStatusEveryTicks == 0)
     {
         refresh_status();
+    }
+    if (m_ticks % kTimingEveryTicks == 0)
+    {
+        log::debug("tick da game thread: media {} us, pico {} us em {} ticks",
+                   m_tick_us_total / kTimingEveryTicks, m_tick_us_peak, kTimingEveryTicks);
+        m_tick_us_total = 0;
+        m_tick_us_peak = 0;
     }
 }
 

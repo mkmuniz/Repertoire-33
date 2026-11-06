@@ -52,5 +52,7 @@ private:
     int m_layout_failures{0};
     bool m_attach_gave_up{false};
     unsigned m_ticks{0};
+    long long m_tick_us_total{0};
+    long long m_tick_us_peak{0};
 };
 } // namespace e33
