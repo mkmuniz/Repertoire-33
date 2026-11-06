@@ -36,7 +36,7 @@ struct SoftPath
 //   - no inimigo do mapa: BP_jRPG_Enemy_World_Base_Seamless_C.BattleMusicParameters,
 //     com o encontro em SelectedEncounter (ou PossibleEncounters, se só houver um);
 //   - na ação de roteiro das lutas de história:
-//     BP_GameAction_TriggerBattle_C.Battle_Start_Params;
+//     BP_GameAction_TriggerBattle_C."Battle Start Params" (com espaços);
 // e copiado para AC_jRPG_BattleManager_C.CurrentBattleStartParams quando a luta
 // começa. Reescrever o caminho do soft pointer antes disso faz o próprio jogo
 // carregar e tocar a faixa escolhida pelo pipeline normal — com a dinâmica de

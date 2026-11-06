@@ -56,7 +56,7 @@ public:
     // Procura em `ustruct` e nas superclasses.
     [[nodiscard]] std::optional<Property> find(std::uintptr_t ustruct, std::string_view name) const;
 
-    // Desce por structs aninhadas: {"Battle_Start_Params", "MusicParameters",
+    // Desce por structs aninhadas: {"Battle Start Params", "MusicParameters",
     // "Music"}. O offset devolvido é a soma, relativo ao início de `ustruct`;
     // nome e tipo são os do último campo.
     [[nodiscard]] std::optional<Property> find_path(std::uintptr_t ustruct,

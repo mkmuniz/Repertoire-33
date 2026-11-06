@@ -235,12 +235,15 @@ MusicPatcher::ClassInfo MusicPatcher::describe(std::uintptr_t klass, FName name)
         break;
     }
     case Kind::Action:
+        // Variável de Blueprint com espaços no nome. O SDK do Dumper-7 a mostra
+        // como "Battle_Start_Params" porque troca espaço por '_'; o FName no
+        // jogo é este, conferido por um SDK nativo que lê o campo ao vivo.
         info.music = need(
-            expect(m_properties.find_path(klass, {"Battle_Start_Params", "MusicParameters", "Music"}),
-                   "SoftObjectProperty", kSoftSize, "Battle_Start_Params.MusicParameters.Music"));
+            expect(m_properties.find_path(klass, {"Battle Start Params", "MusicParameters", "Music"}),
+                   "SoftObjectProperty", kSoftSize, "Battle Start Params.MusicParameters.Music"));
         info.encounter_row = need(expect(
-            m_properties.find_path(klass, {"Battle_Start_Params", "EncounterRow", "RowName"}),
-            "NameProperty", sizeof(FName), "Battle_Start_Params.EncounterRow.RowName"));
+            m_properties.find_path(klass, {"Battle Start Params", "EncounterRow", "RowName"}),
+            "NameProperty", sizeof(FName), "Battle Start Params.EncounterRow.RowName"));
         break;
     case Kind::Manager:
         info.music = need(expect(

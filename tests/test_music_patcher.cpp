@@ -58,7 +58,7 @@ struct E33World
         fake.set_super(goblu_class, enemy_base);
 
         action_class = fake.add("BP_GameAction_TriggerBattle_C", class_class, game);
-        fake.add_field(action_class, "Battle_Start_Params", "StructProperty", 0x30, 0x158,
+        fake.add_field(action_class, "Battle Start Params", "StructProperty", 0x30, 0x158,
                        start_params);
 
         manager_class = fake.add("AC_jRPG_BattleManager_C", class_class, game);

@@ -47,7 +47,7 @@ Keys are encounter ids (the row name the game uses, listed in
 Clair Obscur does not use Wwise: battle music is a native MetaSound, and the
 track for each fight is plain data — a soft pointer inside `S_MusicParameters`,
 held by the world enemy (`BattleMusicParameters`) or by the story action that
-starts a boss fight (`Battle_Start_Params`), and copied into the battle manager
+starts a boss fight (`Battle Start Params`), and copied into the battle manager
 when the fight begins.
 
 The mod rewrites that pointer's path before the fight, so the game loads and
