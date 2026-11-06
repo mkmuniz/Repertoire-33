@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
-#include <span>
 #include <string_view>
 
 namespace e33::unreal
@@ -17,14 +16,10 @@ struct Section
     {
         return address >= start && address < start + size;
     }
-    [[nodiscard]] std::span<const std::uint8_t> bytes() const
-    {
-        return {reinterpret_cast<const std::uint8_t*>(start), size};
-    }
 };
 
 // O executável do jogo. Num build Shipping do Unreal tudo é linkado nele —
-// engine, plugins, Wwise — então é o único módulo onde procurar.
+// engine, plugins, áudio — então é o único módulo onde procurar.
 struct Image
 {
     std::uintptr_t base{0};

@@ -25,8 +25,8 @@ local core_files = {
     "src/Config/*.cpp",
     "src/Data/*.cpp",
     "src/Core/*.cpp",
-    "src/Unreal/Pattern.cpp",    -- leitores do Unreal: so olham memoria, entao
-    "src/Unreal/Memory.cpp",     -- os testes montam o layout do UE5 num buffer
+    "src/Unreal/Memory.cpp",     -- leitores do Unreal: so olham memoria, entao
+                                 -- os testes montam o layout do UE5 num buffer
     "src/Unreal/Names.cpp",      -- e verificam sem o jogo
     "src/Unreal/Objects.cpp",
     "src/Unreal/Properties.cpp",
