@@ -5,11 +5,12 @@ mod with a draggable in-game ImGui overlay. No mod loader required.
 
 ![The overlay](docs/images/overlay.png)
 
-> **Status: pre-alpha.** Not distributable yet — see the note under
-> Installation. What it cannot do yet is
-> swap a track: the combat hook and the audio call (M0/M2) need the game running
-> and are not written. Everything around them — config, catalogue, decision
-> logic, overlay — is built and tested.
+> **Status: alpha, not yet validated in game.** The swap is implemented end to
+> end — combat detection, the real boss and track catalogue, and the write into
+> the game's own battle-music data — and covered by tests that rebuild the
+> game's memory layout off-Windows. It has not run against the game yet; the
+> first session on a PC is what confirms it. See
+> [docs/TESTING.md](docs/TESTING.md) for that checklist.
 
 ## Why this instead of a `.pak` replacement
 
@@ -31,11 +32,32 @@ single file instead of a new mod.
 {
   "enabled": true,
   "overrides": {
-    "Boss_Simon": "Track_Renoir",
-    "Boss_Sirene": "Track_UneVieATaimer"
+    "CFH_Boss_Clea": "/Game/Audio/MetaSound/MUSIC/Tracks/Sea_Cliff/MUS_Track_SeaCliff_BT_Renoir.MUS_Track_SeaCliff_BT_Renoir",
+    "SI_Axon_Sirene": "/Game/Audio/MetaSound/MUSIC/Tracks/Lumiere/MUS_Track_Lumiere_BT_33Decembre.MUS_Track_Lumiere_BT_33Decembre"
   }
 }
 ```
+
+Keys are encounter ids (the row name the game uses, listed in
+`data/bosses.json`); values are the track's asset path (listed in
+`data/tracks.json`). The overlay writes both for you.
+
+## How the swap works
+
+Clair Obscur does not use Wwise: battle music is a native MetaSound, and the
+track for each fight is plain data — a soft pointer inside `S_MusicParameters`,
+held by the world enemy (`BattleMusicParameters`) or by the story action that
+starts a boss fight (`Battle_Start_Params`), and copied into the battle manager
+when the fight begins.
+
+The mod rewrites that pointer's path before the fight, so the game loads and
+plays the chosen track through its own pipeline — fades, loops and the
+intensity triggers included. It never hooks a game function to do it: it finds
+the engine's object table and name pool by structure, resolves every field by
+name (offsets move between patches, field names do not), checks the layout
+against objects every Unreal build has before the first write, and does all of
+this on the game thread. Remove an override and the original path goes back.
+If anything does not match, it stays vanilla and the overlay says why.
 
 ## Installation
 
@@ -104,13 +126,24 @@ See [docs/DEV-MACOS.md](docs/DEV-MACOS.md) for the full split of what runs where
 
 | Milestone | State |
 |---|---|
-| M0 — log the encounter id when combat starts | needs the game; `simulate()` stands in for it |
-| M1 — `bosses.json` / `tracks.json` catalogue | loader, search and "seen in game" done; real ids need the game |
-| M2 — swap to a **native** game track | decision logic done; the audio call needs the game |
+| M0 — log the encounter id when combat starts | done: the battle manager's `EncounterName` edge; first in-game run pending |
+| M1 — `bosses.json` / `tracks.json` catalogue | done: 122 boss encounters, 88 native battle tracks |
+| M2 — swap to a **native** game track | done: rewrite of the battle-music soft pointer; first in-game run pending |
 | M3 — JSON config, empty by default, hot reload | done |
-| M4 — ImGui overlay | done (in the harness; in-game ImGui registration unverified) |
+| M4 — ImGui overlay | done; track preview ("Ouvir") not implemented |
 | M5 — verbose logging, presets, release | logging and presets done |
-| M6 — external audio via Wwise `.wem` | not started (optional) |
+| M6 — external audio files | not started (optional) |
+
+Known limits of the first version:
+
+- Bosses whose later phases push their own track (`_Phase2`, `_Finisher`)
+  may switch back to that track mid-fight; the swap covers the fight's
+  starting music.
+- Fights started from dialogue or the Endless Tower are swapped late, in the
+  battle manager's parameters; the log says whether the swapped track is the
+  one that loaded.
+- Target: the Steam build on UE 5.4.4, where the layouts the mod checks come
+  from. The Game Pass build is untested.
 
 Native tracks are preferred: the E33 soundtrack was written to soften during
 recovery windows and intensify at the climax of a fight. A flat external loop

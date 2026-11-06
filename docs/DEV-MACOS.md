@@ -1,6 +1,6 @@
 # Onde cada parte do trabalho roda
 
-O jogo e o UE4SS só existem no PC Windows. O MacBook não tem o jogo. Isso divide
+O jogo só existe no PC Windows. O MacBook não tem o jogo. Isso divide
 o trabalho em duas metades bem definidas — e a maior parte do código pode nascer
 no Mac.
 
@@ -19,22 +19,23 @@ no Mac.
 
 | Tarefa | Por quê |
 |---|---|
-| Compilar a DLL do mod | MSVC + headers/libs do UE4SS, target Windows x64 |
-| Protótipo Lua do M0 | Precisa do jogo rodando |
+| Compilar a DLL do mod | MSVC, target Windows x64 (o CI faz isso a cada push) |
 | Qualquer hook, leitura de memória, ImGui | Precisa do processo do jogo |
 | FModel (dump dos dados) | App .NET/WPF, Windows-only |
 | Toda validação e medição de dano | Precisa jogar |
-| Wwise (M6 do Boss Music) | Windows-only na prática |
 
 ## Fluxo prático
 
 1. Escreva no Mac, commite, `git push`.
-2. No PC: `git pull`, `xmake f --ue4ss=...`, `xmake`, copiar a DLL para
-   `ue4ss\Mods\<Mod>\dlls\main.dll`, testar.
+2. No PC: baixar o `Repertoire33.zip` do CI (ou `cmake --build build --target
+   package`), extrair em `Sandfall\Binaries\Win64\` e testar seguindo
+   `docs/TESTING.md`.
 3. Achados do jogo (ids de encontro, nomes de classe, offsets) voltam como
    commit de `data/*.json` ou de comentário no código.
 4. O CI em `windows-latest` pega erro de compilação sem você ir ao PC.
 
-**Consequência para o cronograma:** os milestones M0 dos dois projetos são
-100% no PC. Não há como adiantá-los daqui. O que dá para adiantar no Mac é
-M2 do otimizador (extrator), a estrutura de `Calc/`, o CI e os READMEs.
+**Como o M0 e o M2 do Boss Music nasceram no Mac:** os nomes de classe e de
+campo vêm dos SDKs públicos gerados do jogo (Dumper-7), e os testes montam o
+layout do UE 5.4 num buffer para exercitar a leitura e a escrita sem o jogo. O
+que só o PC responde é se o jogo lê a música de onde o SDK diz — e o log foi
+feito para responder isso na primeira sessão.
